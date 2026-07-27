@@ -288,6 +288,15 @@ button.act:hover{background:var(--navy); color:#fff}
         <h3>Valuation basis</h3>
         <div class="body">
           <div class="ctl">
+            <label>Coverage scenario</label>
+            <div class="seg" role="group" aria-label="Coverage scenario">
+              <button id="bFloor" aria-pressed="true">Conservative · floor</button>
+              <button id="bCeil" aria-pressed="false">Optimistic · ceiling</button>
+            </div>
+            <p class="hint" id="scenHint">Conservative floor: assumes every unregistered child is also unvaccinated and beyond the registry's reach. This is the figure the model recommends quoting.</p>
+          </div>
+
+          <div class="ctl">
             <label>Benefit per additional child</label>
             <div class="seg" role="group" aria-label="Valuation approach">
               <button id="bCOI" aria-pressed="true">Cost of illness</button>
@@ -326,8 +335,8 @@ button.act:hover{background:var(--navy); color:#fff}
 
     <div>
       <div class="counts">
-        <div><div class="k">Children reached</div><div class="v num" id="mKids">—</div><div class="u">per year, floor case</div></div>
-        <div><div class="k">Gross benefit</div><div class="v num" id="mGross">—</div><div class="u">per year, floor case</div></div>
+        <div><div class="k">Children reached</div><div class="v num" id="mKids">—</div><div class="u" id="uKids">per year, conservative</div></div>
+        <div><div class="k">Gross benefit</div><div class="v num" id="mGross">—</div><div class="u" id="uGross">per year, conservative</div></div>
         <div><div class="k">Net benefit</div><div class="v acc num" id="mNet">—</div><div class="u">after delivery cost</div></div>
         <div><div class="k">Return</div><div class="v num" id="mBCR">—</div><div class="u">per $1 of delivery</div></div>
       </div>
@@ -340,7 +349,7 @@ button.act:hover{background:var(--navy); color:#fff}
         <table id="tbl2">
           <thead><tr>
             <th class="l">Country</th>
-            <th>Floor</th><th class="l">Births / yr</th>
+            <th id="th2cov">Floor</th><th class="l">Births / yr</th>
             <th>Children reached</th><th>Gross benefit</th><th>Delivery cost</th><th>Net benefit</th>
           </tr></thead>
           <tbody></tbody>
@@ -462,7 +471,7 @@ button.act:hover{background:var(--navy); color:#fff}
 <script>
 const DATA = [{"c": "Afghanistan", "br": 42.3, "im": 59.0, "src": 0, "note": ""}, {"c": "Albania", "br": 98.4, "im": 97.0, "src": 0, "note": ""}, {"c": "Algeria", "br": 99.6, "im": 92.0, "src": 0, "note": ""}, {"c": "Angola", "br": 25.0, "im": 64.0, "src": 0, "note": ""}, {"c": "Argentina", "br": 99.7, "im": 75.0, "src": 0, "note": ""}, {"c": "Armenia", "br": 99.3, "im": 94.0, "src": 0, "note": ""}, {"c": "Azerbaijan", "br": 93.6, "im": 51.0, "src": 1, "note": "Flagged for immunisation challenges in the source sheet."}, {"c": "Bangladesh", "br": 56.0, "im": 97.0, "src": 0, "note": ""}, {"c": "Belarus", "br": 100.0, "im": 98.0, "src": 0, "note": ""}, {"c": "Belize", "br": 95.7, "im": 88.0, "src": 0, "note": ""}, {"c": "Benin", "br": 85.6, "im": 63.0, "src": 0, "note": ""}, {"c": "Bhutan", "br": 99.9, "im": 98.0, "src": 0, "note": ""}, {"c": "Bolivia", "br": 91.9, "im": 59.0, "src": 0, "note": ""}, {"c": "Bosnia and Herzegovina", "br": 99.5, "im": 79.0, "src": 0, "note": ""}, {"c": "Botswana", "br": 87.5, "im": 95.0, "src": 0, "note": ""}, {"c": "Brazil", "br": 96.4, "im": 91.0, "src": 0, "note": ""}, {"c": "Burkina Faso", "br": 76.9, "im": 91.0, "src": 0, "note": ""}, {"c": "Burundi", "br": 83.5, "im": 89.0, "src": 0, "note": ""}, {"c": "Cabo Verde", "br": 91.4, "im": 93.0, "src": 0, "note": ""}, {"c": "Cambodia", "br": 73.3, "im": 83.0, "src": 0, "note": ""}, {"c": "Cameroon", "br": 61.9, "im": 77.0, "src": 0, "note": ""}, {"c": "Central African Republic", "br": 44.8, "im": 42.0, "src": 0, "note": ""}, {"c": "Chad", "br": 25.7, "im": 68.0, "src": 0, "note": ""}, {"c": "Colombia", "br": 96.8, "im": 89.0, "src": 0, "note": ""}, {"c": "Comoros", "br": 87.3, "im": 75.0, "src": 0, "note": ""}, {"c": "Congo, Dem. Rep.", "br": 40.1, "im": 65.0, "src": 0, "note": ""}, {"c": "Congo, Rep.", "br": 95.9, "im": 78.0, "src": 0, "note": ""}, {"c": "Cuba", "br": 99.8, "im": 99.0, "src": 0, "note": ""}, {"c": "Côte d'Ivoire", "br": 71.7, "im": 77.0, "src": 0, "note": ""}, {"c": "Djibouti", "br": 91.7, "im": 77.0, "src": 0, "note": ""}, {"c": "Dominican Republic", "br": 92.2, "im": 87.0, "src": 0, "note": ""}, {"c": "Ecuador", "br": 87.2, "im": 70.0, "src": 0, "note": ""}, {"c": "Egypt, Arab Rep.", "br": 99.4, "im": 97.0, "src": 0, "note": ""}, {"c": "El Salvador", "br": 91.2, "im": 95.0, "src": 0, "note": ""}, {"c": "Equatorial Guinea", "br": 53.5, "im": 68.0, "src": 0, "note": ""}, {"c": "Eswatini", "br": 53.5, "im": 84.0, "src": 0, "note": ""}, {"c": "Fiji", "br": 86.6, "im": 94.0, "src": 0, "note": ""}, {"c": "Gabon", "br": 89.6, "im": 61.0, "src": 0, "note": ""}, {"c": "Gambia, The", "br": 59.0, "im": 80.0, "src": 0, "note": ""}, {"c": "Georgia", "br": 98.5, "im": 86.0, "src": 0, "note": ""}, {"c": "Ghana", "br": 70.6, "im": 95.0, "src": 0, "note": ""}, {"c": "Guatemala", "br": 96.4, "im": 81.0, "src": 0, "note": ""}, {"c": "Guinea", "br": 62.0, "im": 63.0, "src": 0, "note": ""}, {"c": "Guinea-Bissau", "br": 46.0, "im": 68.0, "src": 0, "note": ""}, {"c": "Haiti", "br": 84.8, "im": 60.0, "src": 0, "note": "Widespread insecurity limits outreach regardless of registry quality."}, {"c": "Honduras", "br": 97.0, "im": 75.0, "src": 0, "note": ""}, {"c": "India", "br": 89.1, "im": 94.0, "src": 0, "note": ""}, {"c": "Indonesia", "br": 77.0, "im": 78.0, "src": 0, "note": ""}, {"c": "Iran, Islamic Rep.", "br": 98.6, "im": 98.0, "src": 0, "note": ""}, {"c": "Iraq", "br": 98.8, "im": 90.0, "src": 0, "note": ""}, {"c": "Jamaica", "br": 98.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Jordan", "br": 98.0, "im": 96.0, "src": 0, "note": ""}, {"c": "Kazakhstan", "br": 99.7, "im": 98.0, "src": 0, "note": ""}, {"c": "Kenya", "br": 66.9, "im": 91.0, "src": 0, "note": ""}, {"c": "Kiribati", "br": 91.6, "im": 94.0, "src": 0, "note": ""}, {"c": "Korea, Dem. People's Rep.", "br": 100.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Kyrgyz Republic", "br": 98.9, "im": 85.0, "src": 0, "note": ""}, {"c": "Lao PDR", "br": 73.0, "im": 67.0, "src": 0, "note": ""}, {"c": "Lebanon", "br": 98.9, "im": 49.0, "src": 0, "note": "Coverage collapse is driven by economic crisis and health-system breakdown, not by inability to locate children."}, {"c": "Lesotho", "br": 44.5, "im": 86.0, "src": 0, "note": ""}, {"c": "Liberia", "br": 66.3, "im": 83.0, "src": 0, "note": ""}, {"c": "Madagascar", "br": 73.8, "im": 60.0, "src": 0, "note": ""}, {"c": "Malawi", "br": 67.2, "im": 91.0, "src": 0, "note": ""}, {"c": "Maldives", "br": 98.8, "im": 99.0, "src": 0, "note": ""}, {"c": "Mali", "br": 86.7, "im": 82.0, "src": 0, "note": ""}, {"c": "Marshall Islands", "br": 83.8, "im": 85.0, "src": 0, "note": ""}, {"c": "Mauritania", "br": 44.8, "im": 86.0, "src": 0, "note": ""}, {"c": "Mexico", "br": 97.0, "im": 78.0, "src": 0, "note": ""}, {"c": "Moldova", "br": 99.6, "im": 86.0, "src": 0, "note": ""}, {"c": "Mongolia", "br": 99.6, "im": 96.0, "src": 0, "note": ""}, {"c": "Montenegro", "br": 99.4, "im": 81.0, "src": 0, "note": ""}, {"c": "Morocco", "br": 96.9, "im": 96.0, "src": 0, "note": ""}, {"c": "Mozambique", "br": 55.0, "im": 70.0, "src": 0, "note": ""}, {"c": "Myanmar", "br": 81.3, "im": 71.0, "src": 0, "note": ""}, {"c": "Namibia", "br": 78.1, "im": 74.0, "src": 0, "note": ""}, {"c": "Nepal", "br": 77.2, "im": 97.0, "src": 0, "note": ""}, {"c": "Nicaragua", "br": 84.7, "im": 89.0, "src": 0, "note": ""}, {"c": "Niger", "br": 63.9, "im": 86.0, "src": 0, "note": ""}, {"c": "Nigeria", "br": 42.6, "im": 67.0, "src": 0, "note": ""}, {"c": "North Macedonia", "br": 99.8, "im": 89.0, "src": 0, "note": ""}, {"c": "Pakistan", "br": 42.2, "im": 87.0, "src": 0, "note": ""}, {"c": "Papua New Guinea", "br": 13.4, "im": 42.0, "src": 0, "note": ""}, {"c": "Paraguay", "br": 71.0, "im": 80.0, "src": 0, "note": ""}, {"c": "Peru", "br": 96.4, "im": 80.0, "src": 0, "note": ""}, {"c": "Philippines", "br": 91.8, "im": 71.0, "src": 0, "note": ""}, {"c": "Rwanda", "br": 85.6, "im": 98.0, "src": 0, "note": ""}, {"c": "Samoa", "br": 66.9, "im": 85.0, "src": 0, "note": ""}, {"c": "Senegal", "br": 78.7, "im": 91.0, "src": 0, "note": ""}, {"c": "Serbia", "br": 99.9, "im": 95.0, "src": 0, "note": ""}, {"c": "Sierra Leone", "br": 90.4, "im": 91.0, "src": 0, "note": ""}, {"c": "Solomon Islands", "br": 88.0, "im": 87.0, "src": 0, "note": ""}, {"c": "Somalia, Fed. Rep.", "br": 5.9, "im": 70.0, "src": 0, "note": ""}, {"c": "South Africa", "br": 88.6, "im": 74.0, "src": 0, "note": ""}, {"c": "South Sudan", "br": 35.4, "im": 73.0, "src": 0, "note": ""}, {"c": "Sri Lanka", "br": 97.2, "im": 97.0, "src": 0, "note": ""}, {"c": "St. Lucia", "br": 92.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Sudan", "br": 67.3, "im": 39.0, "src": 0, "note": ""}, {"c": "Suriname", "br": 98.3, "im": 69.0, "src": 0, "note": ""}, {"c": "Syrian Arab Republic", "br": 96.0, "im": 73.0, "src": 0, "note": "Conflict-affected; access and supply are the binding constraints on coverage."}, {"c": "São Tomé and Principe", "br": 98.6, "im": 87.0, "src": 0, "note": ""}, {"c": "Tajikistan", "br": 95.8, "im": 97.0, "src": 0, "note": ""}, {"c": "Tanzania", "br": 26.4, "im": 83.0, "src": 0, "note": ""}, {"c": "Thailand", "br": 99.8, "im": 92.0, "src": 0, "note": ""}, {"c": "Timor-Leste", "br": 60.4, "im": 83.0, "src": 0, "note": ""}, {"c": "Togo", "br": 82.9, "im": 90.0, "src": 0, "note": ""}, {"c": "Tonga", "br": 97.7, "im": 99.0, "src": 0, "note": ""}, {"c": "Tunisia", "br": 99.9, "im": 97.0, "src": 0, "note": ""}, {"c": "Turkmenistan", "br": 99.9, "im": 98.0, "src": 0, "note": ""}, {"c": "Tuvalu", "br": 87.2, "im": 94.0, "src": 0, "note": ""}, {"c": "Türkiye", "br": 98.4, "im": 99.0, "src": 0, "note": ""}, {"c": "Uganda", "br": 32.2, "im": 91.0, "src": 0, "note": ""}, {"c": "Ukraine", "br": 99.8, "im": 88.0, "src": 0, "note": ""}, {"c": "Uzbekistan", "br": 99.9, "im": 90.0, "src": 0, "note": ""}, {"c": "Vanuatu", "br": 43.4, "im": 71.0, "src": 0, "note": ""}, {"c": "Viet Nam", "br": 96.1, "im": 97.0, "src": 0, "note": ""}, {"c": "West Bank and Gaza", "br": 99.2, "im": 88.0, "src": 0, "note": "Conflict-affected; service delivery is the binding constraint."}, {"c": "Yemen, Rep.", "br": 30.7, "im": 42.0, "src": 0, "note": ""}, {"c": "Zambia", "br": 14.0, "im": 91.0, "src": 0, "note": ""}, {"c": "Zimbabwe", "br": 48.7, "im": 91.0, "src": 0, "note": ""}];
 const $ = id => document.getElementById(id);
-const state = {minBR:90, minGap:10, exFlag:true, names:false, ben:550, basis:'coi', cost:80, cohort:null, over:{}};
+const state = {minBR:90, minGap:10, exFlag:true, names:false, ben:550, basis:'coi', cost:80, cohort:null, over:{}, scenario:'floor'};
 
 const CITES = {
   coi:'<b>Sim et al.</b> (2020) <i>Health Affairs</i> 39(8): ROI of 19.8–26.1 under cost of illness; <b>Ozawa et al.</b> (2016) <i>Health Affairs</i> 35(2) report ~16×. Applied to a cost per DTP3-vaccinated child of <b>$27</b> (<b>Brenzel</b> 2015, <i>Vaccine</i>). Derived figure — <b>Class C</b>.',
@@ -487,6 +496,8 @@ const selected = () => ALL.filter(d =>
 ).sort((a,b) => b.floor - a.floor);
 const setAside = () => ALL.filter(d => d.br >= state.minBR && d.gap >= state.minGap && d.floor > 0 && d.flagged);
 const cohortFor = d => state.over[d.c] != null ? state.over[d.c] : state.cohort;
+/* coverage points carried into the money calc: floor (conservative) or gap (optimistic ceiling) */
+const coverageOf = d => state.scenario === 'ceiling' ? d.gap : d.floor;
 const money = n => n == null ? '—' :
   (n >= 1e9 ? '$' + (n/1e9).toFixed(2) + 'bn' : n >= 1e6 ? '$' + (n/1e6).toFixed(1) + 'm' :
    n >= 1e3 ? '$' + Math.round(n/1e3) + 'k' : '$' + Math.round(n));
@@ -681,16 +692,17 @@ function drawTable2(){
 
   tb.innerHTML = sel.map(d => {
     const coh = cohortFor(d);
+    const cov = coverageOf(d);
     let kids = null, gross = null, cost = null, net = null;
     if(coh != null && coh > 0){
       any = true;
-      kids = d.floor/100 * coh; gross = kids*state.ben; cost = kids*state.cost; net = gross - cost;
+      kids = cov/100 * coh; gross = kids*state.ben; cost = kids*state.cost; net = gross - cost;
       tK += kids; tG += gross; tC += cost;
     }
     const val = state.over[d.c] != null ? state.over[d.c] : '';
     return `<tr>
       <td class="l name">${esc(d.c)}</td>
-      <td class="num floorcell">${d.floor.toFixed(1)}</td>
+      <td class="num floorcell">${cov.toFixed(1)}</td>
       <td class="l"><input type="number" min="0" step="1000" data-c="${esc(d.c)}" value="${val}" placeholder="${state.cohort ?? '—'}" aria-label="Annual births for ${esc(d.c)}"></td>
       <td class="num ${kids==null?'dash':''}">${int(kids)}</td>
       <td class="num ${gross==null?'dash':''}">${money(gross)}</td>
@@ -707,6 +719,11 @@ function drawTable2(){
   $('mNet').textContent = any ? money(tG - tC) : '—';
   $('mBCR').textContent = (any && tC > 0) ? (tG/tC).toFixed(1) + '×' : '—';
 
+  const optimistic = state.scenario === 'ceiling';
+  $('th2cov').textContent = optimistic ? 'Ceiling' : 'Floor';
+  $('uKids').textContent = optimistic ? 'per year, optimistic' : 'per year, conservative';
+  $('uGross').textContent = optimistic ? 'per year, optimistic' : 'per year, conservative';
+
   tb.querySelectorAll('input').forEach(inp => inp.addEventListener('change', e => {
     const v = e.target.value.trim();
     if(v === '') delete state.over[e.target.dataset.c];
@@ -715,6 +732,7 @@ function drawTable2(){
   }));
 
   $('paramEcho').innerHTML = `
+    Scenario — <b>${state.scenario === 'ceiling' ? 'optimistic (ceiling)' : 'conservative (floor)'}</b><br>
     Basis — <b>${state.basis === 'coi' ? 'cost of illness' : 'value of a statistical life'}</b><br>
     Benefit per child — <b>$${state.ben.toLocaleString('en-US')}</b><br>
     Delivery cost per child — <b>$${state.cost.toLocaleString('en-US')}</b><br>
@@ -760,6 +778,18 @@ function setBasis(b){
 }
 $('bCOI').addEventListener('click', () => setBasis('coi'));
 $('bVSL').addEventListener('click', () => setBasis('vsl'));
+
+function setScenario(sc){
+  state.scenario = sc;
+  $('bFloor').setAttribute('aria-pressed', sc === 'floor');
+  $('bCeil').setAttribute('aria-pressed', sc === 'ceiling');
+  $('scenHint').innerHTML = sc === 'floor'
+    ? "Conservative floor: assumes every unregistered child is also unvaccinated and beyond the registry's reach. This is the figure the model recommends quoting."
+    : 'Optimistic ceiling: assumes every unvaccinated child is registered, so the registry can find all of them. An upper bound to bracket the case, not a forecast.';
+  render();
+}
+$('bFloor').addEventListener('click', () => setScenario('floor'));
+$('bCeil').addEventListener('click', () => setScenario('ceiling'));
 $('nBen').addEventListener('input', e => { state.ben = Math.max(0, +e.target.value || 0); render(); });
 $('nCost').addEventListener('input', e => { state.cost = Math.max(0, +e.target.value || 0); render(); });
 $('nCohort').addEventListener('input', e => {
@@ -774,13 +804,14 @@ $('dl').addEventListener('click', () => {
   const lines = [['Country','Birth registration %','DPT3 immunization %','Gap (ceiling pp)','Unregistered %','Floor (conservative pp)','Births per year','Children reached','Gross benefit USD','Delivery cost USD','Net benefit USD','Context flag'].join(',')];
   sel.forEach(d => {
     const coh = cohortFor(d);
-    const kids = coh ? d.floor/100*coh : '';
+    const kids = coh ? coverageOf(d)/100*coh : '';
     const gross = kids === '' ? '' : Math.round(kids*state.ben);
     const cost = kids === '' ? '' : Math.round(kids*state.cost);
     lines.push([`"${d.c}"`, d.br, d.im, d.gap, d.unreg, d.floor, coh ?? '',
       kids === '' ? '' : Math.round(kids), gross, cost, gross === '' ? '' : gross - cost, `"${d.note}"`].join(','));
   });
-  lines.push('', `"Basis","${state.basis === 'coi' ? 'Cost of illness' : 'Value of a statistical life'}"`,
+  lines.push('', `"Coverage scenario","${state.scenario === 'ceiling' ? 'Optimistic (ceiling = gap)' : 'Conservative (floor)'}","Children reached, gross and net benefit are computed on this scenario"`,
+    `"Basis","${state.basis === 'coi' ? 'Cost of illness' : 'Value of a statistical life'}"`,
     `"Benefit per child USD",${state.ben},"Class C - derived from Sim et al 2020 ratio and Brenzel 2015 unit cost"`,
     `"Delivery cost per child USD",${state.cost},"Class B - Clarke-Deelder et al Mission Indradhanush"`,
     `"Min birth registration %",${state.minBR}`, `"Min gap pp",${state.minGap}`,
