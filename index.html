@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRVS–Immunization Linkage Model | Vital Strategies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#24337A; --orange:#EF7622; --grey:#6E6F72;
+  --paper:#FFFFFF; --tint:#F4F5F9; --rule:#DCDFE8;
+  --caution:#B3261E; --ink:#1A1D26;
+  --navy-08:rgba(36,51,122,.08); --orange-pale:#F9D3B4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Libre Franklin",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  color:var(--ink); background:var(--paper); font-weight:400; line-height:1.5;
+  font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- masthead ---------- */
+.masthead{background:var(--navy); color:#fff; padding:26px 28px 22px}
+.masthead .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:600; color:#A9B3DA; margin:0 0 8px}
+.masthead h1{margin:0; font-size:clamp(22px,3.4vw,34px); font-weight:800; letter-spacing:-.02em; line-height:1.12}
+.masthead p{margin:9px 0 0; max-width:74ch; font-size:14px; font-weight:300; color:#D8DDF0}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex; border-bottom:1px solid var(--rule); background:var(--tint); padding:0 28px; flex-wrap:wrap}
+.tab{appearance:none; border:0; background:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; color:var(--grey); padding:14px 18px; border-bottom:3px solid transparent}
+.tab:hover{color:var(--navy)}
+.tab[aria-selected="true"]{color:var(--navy); border-bottom-color:var(--orange)}
+.tab:focus-visible{outline:2px solid var(--orange); outline-offset:-2px}
+.panel{padding:24px 28px 56px}
+.panel[hidden]{display:none}
+
+/* ---------- layout ---------- */
+.rail{display:grid; grid-template-columns:300px minmax(0,1fr); gap:26px; align-items:start}
+@media(max-width:940px){.rail{grid-template-columns:1fr}}
+.card{border:1px solid var(--rule); background:var(--paper)}
+.card h3{margin:0; padding:11px 14px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:600; color:var(--navy); background:var(--tint); border-bottom:1px solid var(--rule)}
+.card .body{padding:14px}
+
+.ctl{margin-bottom:18px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:block; font-size:12px; font-weight:600; margin-bottom:6px}
+.ctl .hint{font-size:11px; color:var(--grey); font-weight:300; margin-top:5px; line-height:1.45}
+.ctl .val{float:right; font-weight:800; color:var(--orange)}
+input[type=range]{width:100%; accent-color:var(--navy); margin:2px 0}
+input[type=number],input[type=text]{width:100%; font-family:inherit; font-size:13px; padding:7px 9px; border:1px solid var(--rule); background:#fff; color:var(--ink); font-variant-numeric:tabular-nums}
+input:focus-visible,button:focus-visible{outline:2px solid var(--orange); outline-offset:1px}
+.check{display:flex; gap:9px; align-items:flex-start; font-size:12px; cursor:pointer}
+.check input{margin:2px 0 0; accent-color:var(--navy); flex:0 0 auto}
+.seg{display:flex; border:1px solid var(--rule)}
+.seg button{flex:1; appearance:none; border:0; background:#fff; cursor:pointer; font-family:inherit; font-size:11px; font-weight:600; padding:8px 4px; color:var(--grey)}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--navy); color:#fff}
+
+/* ---------- evidence class chips + inline citation ---------- */
+.ev{display:inline-block; font-size:9px; font-weight:800; letter-spacing:.08em; padding:1px 5px; border-radius:2px; vertical-align:middle; margin-left:5px; white-space:nowrap}
+.ev.a{background:var(--navy); color:#fff}
+.ev.b{background:#fff; color:var(--navy); border:1px solid var(--navy)}
+.ev.c{background:#fff; color:var(--orange); border:1px dashed var(--orange)}
+.cite{
+  display:block; font-size:10.5px; line-height:1.5; color:var(--navy); font-weight:400;
+  margin-top:6px; padding-left:9px; border-left:2px solid var(--orange);
+}
+.cite i{font-style:italic}
+.cite b{font-weight:600}
+
+/* ---------- derivation chain ---------- */
+.chain{font-size:11.5px; line-height:1.5}
+.chain .step{padding:9px 0; border-bottom:1px dotted var(--rule)}
+.chain .step:last-child{border-bottom:0; padding-bottom:0}
+.chain .qty{font-weight:800; color:var(--navy); font-size:13px; display:block}
+.chain .op{text-align:center; color:var(--orange); font-weight:800; font-size:14px; padding:2px 0}
+.chain .out{background:var(--tint); margin:0 -14px -14px; padding:12px 14px; border-top:2px solid var(--orange)}
+.chain .out .qty{color:var(--orange); font-size:17px}
+
+/* ---------- plot ---------- */
+.plotwrap{border:1px solid var(--rule); background:#fff; position:relative}
+.plothead{padding:13px 16px; border-bottom:1px solid var(--rule)}
+.plothead .t{font-size:14px; font-weight:800; letter-spacing:-.01em}
+.plothead .s{font-size:11.5px; color:var(--grey); font-weight:300; margin-top:3px; max-width:70ch}
+svg.plot{display:block; width:100%; height:auto}
+.legend{display:flex; flex-wrap:wrap; gap:6px 20px; padding:12px 16px; border-top:1px solid var(--rule); background:var(--tint)}
+.legend div{display:flex; align-items:center; gap:7px; font-size:11px; color:var(--ink)}
+.legend .sw{flex:0 0 auto; width:15px; height:11px; position:relative}
+.gutname{font-size:10.5px; font-weight:600; fill:var(--ink)}
+.gutval{font-size:10.5px; font-weight:800; fill:var(--orange)}
+.guthead{font-size:8.5px; font-weight:700; fill:var(--grey); letter-spacing:.1em; text-transform:uppercase}
+.tick{font-size:9px; fill:var(--grey); font-weight:300}
+.axlabel{font-size:9.5px; font-weight:600; fill:var(--grey); letter-spacing:.07em; text-transform:uppercase}
+.region{font-size:9.5px; font-weight:500; fill:var(--grey); letter-spacing:.02em}
+.region.hi{fill:var(--orange); font-weight:800; letter-spacing:.09em; text-transform:uppercase; font-size:10.5px}
+.dotname{font-size:9px; font-weight:600; fill:var(--navy); paint-order:stroke; stroke:#fff; stroke-width:3px; stroke-linejoin:round}
+.dotfloor{font-size:8.5px; font-weight:800; fill:var(--orange); paint-order:stroke; stroke:#fff; stroke-width:3px}
+.parity{font-size:8.5px; font-weight:600; fill:var(--navy); opacity:.55; letter-spacing:.04em}
+.ozone{font-size:10.5px; font-weight:800; fill:var(--orange); letter-spacing:.14em}
+.ozonesub{font-size:9px; font-weight:500; fill:var(--orange); opacity:.85; letter-spacing:.02em}
+svg.plot text{pointer-events:none; user-select:none}
+.dot{transition:none}
+.dot.hl{stroke:var(--navy); stroke-width:2; opacity:1}
+.hit{fill:transparent; cursor:pointer}
+
+/* ---------- plot hover tooltip ---------- */
+.tip{
+  position:absolute; z-index:6; pointer-events:none; left:0; top:0;
+  min-width:158px; max-width:236px;
+  background:#fff; border:1px solid var(--rule); border-top:3px solid var(--orange);
+  box-shadow:0 8px 26px rgba(26,29,38,.17); padding:11px 13px;
+  font-size:11.5px; line-height:1.5;
+  opacity:0; transform:translateY(5px); transition:opacity .12s ease, transform .12s ease;
+}
+.tip.show{opacity:1; transform:none}
+.tip .tc{font-weight:800; color:var(--navy); font-size:13px; letter-spacing:-.01em; margin-bottom:5px}
+.tip .badge{display:inline-block; font-size:8.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; margin-bottom:8px}
+.tip .badge.sel{background:var(--orange); color:#fff}
+.tip .badge.aside{background:#fff; color:var(--caution); border:1px solid var(--caution)}
+.tip .badge.bg{background:var(--tint); color:var(--grey)}
+.tip .row{display:flex; justify-content:space-between; gap:16px; padding:1px 0}
+.tip .row span:first-child{color:var(--grey); font-weight:400}
+.tip .row span:last-child{font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums}
+.tip .lead{margin-top:8px; padding-top:8px; border-top:1px dotted var(--rule); color:var(--navy); font-weight:600; font-size:11px}
+.tip .lead b{color:var(--orange); font-weight:800}
+.tip .anote{margin-top:8px; padding-top:8px; border-top:1px dotted var(--rule); color:var(--caution); font-size:10.5px; line-height:1.45; font-weight:400}
+
+/* ---------- counters ---------- */
+.counts{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-bottom:20px}
+.counts div{background:#fff; padding:13px 14px}
+.counts .k{font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--grey); font-weight:600}
+.counts .v{font-size:26px; font-weight:800; letter-spacing:-.03em; color:var(--navy); line-height:1.15; margin-top:3px}
+.counts .v.acc{color:var(--orange)}
+.counts .u{font-size:11px; color:var(--grey); font-weight:300}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto; border:1px solid var(--rule)}
+table{border-collapse:collapse; width:100%; font-size:12.5px; min-width:660px}
+th{text-align:right; font-size:10px; letter-spacing:.09em; text-transform:uppercase; font-weight:600; color:var(--navy); background:var(--tint); padding:9px 10px; border-bottom:1px solid var(--rule); white-space:nowrap; vertical-align:bottom}
+th.l,td.l{text-align:left}
+td{padding:8px 10px; border-bottom:1px solid var(--rule); text-align:right; white-space:nowrap}
+tbody tr:hover{background:var(--navy-08)}
+td.name{font-weight:600; white-space:normal; min-width:150px}
+.floorcell{font-weight:800; color:var(--orange)}
+.bar{display:inline-block; height:9px; background:var(--tint); position:relative; vertical-align:middle; width:74px; margin-right:7px}
+.bar i{position:absolute; left:0; top:0; height:100%; background:var(--orange); display:block}
+.bar u{position:absolute; left:0; top:0; height:100%; background:var(--orange-pale); display:block; text-decoration:none}
+.flag{display:inline-block; font-size:9px; font-weight:700; color:var(--caution); border:1px solid var(--caution); padding:1px 5px; margin-left:6px; vertical-align:middle; border-radius:2px; cursor:help}
+.tier2 td.name::after{content:"tier 2"; font-size:9px; font-weight:600; color:var(--grey); margin-left:7px}
+td input{width:88px; text-align:right; padding:4px 6px; font-size:12px}
+.dash{color:var(--grey); font-weight:300}
+
+/* ---------- notes / prose ---------- */
+.note{border-left:3px solid var(--orange); background:#FFF9F4; padding:12px 15px; font-size:12.5px; margin:20px 0; line-height:1.55}
+.note strong{color:var(--navy)}
+.note.warn{border-left-color:var(--caution); background:#FDF4F3}
+.note .cite{margin-top:8px}
+.empty{padding:34px 20px; text-align:center; color:var(--grey); font-size:13px; border:1px dashed var(--rule)}
+.prose{max-width:80ch}
+.prose h2{font-size:19px; font-weight:800; margin:30px 0 10px; color:var(--navy)}
+.prose h2:first-child{margin-top:4px}
+.prose h3{font-size:13.5px; font-weight:700; margin:20px 0 6px}
+.prose p{font-size:13.5px; margin:0 0 11px; line-height:1.62}
+.prose li{font-size:13.5px; margin-bottom:9px; line-height:1.58}
+.eq{background:var(--tint); border:1px solid var(--rule); border-left:3px solid var(--navy); padding:12px 15px; margin:12px 0; font-size:13px}
+.eq b{color:var(--navy)}
+.eq .cite{border-left-color:var(--navy)}
+.keytab{width:100%; border-collapse:collapse; font-size:12.5px; margin:14px 0; min-width:0}
+.keytab th{text-align:left}
+.keytab td{text-align:left; white-space:normal; vertical-align:top; line-height:1.5}
+.keytab td:first-child{font-weight:600; width:31%}
+button.act{appearance:none; border:1px solid var(--navy); background:#fff; color:var(--navy); font-family:inherit; font-size:12px; font-weight:600; padding:8px 15px; cursor:pointer}
+button.act:hover{background:var(--navy); color:#fff}
+.actions{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <p class="eyebrow">Vital Strategies · CRVS investment case · working model</p>
+  <h1>What could linking birth registries to immunization programmes deliver?</h1>
+  <p>Where registration is high but immunization lags, the state already knows these children exist. The registry can be used as a find-list for the ones missing vaccines. This model sizes that opportunity conservatively and prices it against published evidence.</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true">Where the opportunity is</button>
+  <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false">What it is worth</button>
+  <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false">Method &amp; sources</button>
+</nav>
+
+<!-- ============ PANEL 1 ============ -->
+<section class="panel" id="p1" role="tabpanel" aria-labelledby="t1">
+  <div class="rail">
+    <div>
+      <div class="card">
+        <h3>Define the opportunity</h3>
+        <div class="body">
+          <div class="ctl">
+            <label for="sBR">Minimum birth registration <span class="val num" id="vBR">90%</span></label>
+            <input type="range" id="sBR" min="50" max="100" step="1" value="90">
+            <p class="hint">The registry can only reach children recorded in it, so this threshold sets how much of the case rests on registry data actually existing.</p>
+          </div>
+          <div class="ctl">
+            <label for="sGap">Minimum coverage gap <span class="val num" id="vGap">10 pp</span></label>
+            <input type="range" id="sGap" min="0" max="45" step="1" value="10">
+            <p class="hint">Registration minus immunization. Below this the headroom is too small to justify the intervention.</p>
+          </div>
+          <div class="ctl">
+            <label class="check">
+              <input type="checkbox" id="cFlag" checked>
+              <span>Set aside countries where access, not identification, is the binding constraint
+              <span class="hint" style="margin-top:4px">Conflict, economic collapse or supply failure. A registry can locate these children but cannot get them vaccinated.</span></span>
+            </label>
+          </div>
+          <div class="ctl">
+            <label class="check">
+              <input type="checkbox" id="cNames">
+              <span>Also label the countries beside the plot
+              <span class="hint" style="margin-top:4px">Off by default for a cleaner chart — hover any dot to read it. Turn on to see every qualifying country named at once.</span></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>Why bracket, not estimate</h3>
+        <div class="body">
+          <p style="font-size:12px;margin:0;line-height:1.6">The sheet gives two separate rates but not the join between them — of the children missing vaccines, how many are registered? That cross-tabulation is unpublished, so a single point estimate is not available and the model brackets the answer instead.
+          <span class="ev c">CLASS C</span></p>
+          <span class="cite">Gap identified in the CRVS evidence review as computable from <b>MICS / DHS microdata</b> at child level. Closing it would collapse this bracket to a point estimate.</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="counts">
+        <div><div class="k">Qualifying</div><div class="v num" id="kN">0</div><div class="u">countries</div></div>
+        <div><div class="k">Median floor</div><div class="v acc num" id="kMed">0</div><div class="u">pp, conservative</div></div>
+        <div><div class="k">Median ceiling</div><div class="v num" id="kOpt">0</div><div class="u">pp, optimistic</div></div>
+        <div><div class="k">Set aside</div><div class="v num" id="kFlag">0</div><div class="u">context flags</div></div>
+      </div>
+
+      <div class="plotwrap">
+        <div class="plothead">
+          <div class="t">Where a birth registry could raise immunization coverage</div>
+          <div class="s">Each dot is a country: how many of its children are registered at birth (across) against how many are vaccinated (up). <b>Hover any dot to see its numbers</b>, including the coverage a registry could add. Orange dots are the qualifying countries — those with enough registered-but-unvaccinated children for a registry to make a difference.</div>
+        </div>
+        <svg class="plot" id="plot" viewBox="0 0 680 566" role="img" aria-label="Birth registration against immunization coverage, with the coverage a registry could add"></svg>
+        <div class="legend">
+          <div><span class="sw" style="background:var(--orange);border-radius:50%;width:11px"></span> Qualifying country</div>
+          <div><span class="sw" style="border:1.5px dashed var(--caution);border-radius:50%;width:11px"></span> Set aside — access-constrained</div>
+          <div><span class="sw" style="background:var(--grey);opacity:.3;border-radius:50%;width:9px"></span> Other countries</div>
+        </div>
+      </div>
+
+      <div style="margin-top:22px">
+        <div class="scroll">
+          <table id="tbl1">
+            <thead><tr>
+              <th class="l">Country</th>
+              <th>Birth reg.</th><th>Immunization</th>
+              <th>Gap</th><th>Unregistered</th>
+              <th>Ceiling</th><th>Floor</th><th class="l">Floor within ceiling</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="empty" id="empty1" hidden>No countries meet these thresholds. Loosen the registration or gap setting.</div>
+      </div>
+
+      <div class="note">
+        <strong>Why the floor is the number to quote.</strong> The ceiling assumes every unvaccinated child is registered and therefore findable. The floor assumes the opposite — that every unregistered child is also unvaccinated and beyond the registry's reach. Where the floor turns negative, the model is saying registration is too low for linkage to guarantee anything, and the country drops out of the list.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANEL 2 ============ -->
+<section class="panel" id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+  <div class="rail">
+    <div>
+      <div class="card">
+        <h3>Valuation basis</h3>
+        <div class="body">
+          <div class="ctl">
+            <label>Benefit per additional child</label>
+            <div class="seg" role="group" aria-label="Valuation approach">
+              <button id="bCOI" aria-pressed="true">Cost of illness</button>
+              <button id="bVSL" aria-pressed="false">Statistical life</button>
+            </div>
+            <input type="number" id="nBen" value="550" min="0" step="25" style="margin-top:8px" aria-label="Benefit per child in US dollars">
+            <p class="hint" id="benHint">Averted treatment costs and caregiver productivity losses. The narrower, more defensible basis — use this for funder-facing figures.</p>
+            <span class="cite" id="benCite"></span>
+          </div>
+
+          <div class="ctl">
+            <label for="nCost">Delivery cost per child reached <span class="ev b">CLASS B</span></label>
+            <input type="number" id="nCost" value="80" min="0" step="5">
+            <p class="hint">Marginal cost of reaching a child the system has been missing, not the programme average. Set to 0 to show gross benefit only.</p>
+            <span class="cite"><b>Clarke-Deelder et al.</b>, cost evaluation of India's Intensified Mission Indradhanush: incremental cost of roughly <b>$83 per zero-dose child reached</b>, with wide uncertainty. Programme-average costs would understate what these specific children cost to find.</span>
+          </div>
+
+          <div class="ctl">
+            <label for="nCohort">Illustrative annual birth cohort <span class="ev c">CLASS C</span></label>
+            <input type="number" id="nCohort" placeholder="e.g. 100000" min="0" step="10000">
+            <p class="hint">Applied uniformly to every country so the arithmetic can be demonstrated. It is <b>not</b> a country estimate. Override per country in the table, or load UN World Population Prospects births before this goes anywhere external.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>How the per-child figure is built</h3>
+        <div class="body chain" id="chain"></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>Live parameters</h3>
+        <div class="body" id="paramEcho" style="font-size:12px;color:var(--grey);line-height:1.7"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="counts">
+        <div><div class="k">Children reached</div><div class="v num" id="mKids">—</div><div class="u">per year, floor case</div></div>
+        <div><div class="k">Gross benefit</div><div class="v num" id="mGross">—</div><div class="u">per year, floor case</div></div>
+        <div><div class="k">Net benefit</div><div class="v acc num" id="mNet">—</div><div class="u">after delivery cost</div></div>
+        <div><div class="k">Return</div><div class="v num" id="mBCR">—</div><div class="u">per $1 of delivery</div></div>
+      </div>
+
+      <div class="note" id="cohortWarn">
+        <strong>No cohort data loaded.</strong> Monetary results stay blank until you enter an illustrative cohort or per-country birth numbers. A blank cell is more useful than an invented one.
+      </div>
+
+      <div class="scroll">
+        <table id="tbl2">
+          <thead><tr>
+            <th class="l">Country</th>
+            <th>Floor</th><th class="l">Births / yr</th>
+            <th>Children reached</th><th>Gross benefit</th><th>Delivery cost</th><th>Net benefit</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty2" hidden>No countries meet the thresholds set on the first tab.</div>
+
+      <div class="actions">
+        <button class="act" id="dl">Download results as CSV</button>
+        <button class="act" id="clearC">Clear entered birth numbers</button>
+      </div>
+
+      <div class="note warn">
+        <strong>What this model does not claim.</strong> These are the benefits of the additional immunization itself, not of Vital Strategies' contribution to it. Attribution rests with governments and immunization programmes; registry linkage is one enabling input among several. Net benefit must not be presented as a return on Vital's own spend.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANEL 3 ============ -->
+<section class="panel" id="p3" role="tabpanel" aria-labelledby="t3" hidden>
+  <div class="prose">
+
+    <h2>Evidence classes used here</h2>
+    <table class="keytab">
+      <tbody>
+        <tr><td><span class="ev a">CLASS A</span> Peer-reviewed</td><td>Published in a peer-reviewed journal, quoted as the authors report it. Every ratio and unit cost in this model is Class A.</td></tr>
+        <tr><td><span class="ev b">CLASS B</span> Institutional</td><td>Costing studies and institutional publications from UNICEF, Gavi or WHO, and evaluations reported outside peer review.</td></tr>
+        <tr><td><span class="ev c">CLASS C</span> Derived or assumed</td><td>Produced by this model from Class A and B inputs, or an assumption we are making. Never presentable as a published finding.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>The scenario arithmetic</h2>
+    <p>For each country the source sheet gives two marginal rates: birth registration and DPT3 immunization. It does not give the join between them. Without that cross-tabulation a point estimate is not available, so the model brackets the answer.</p>
+
+    <div class="eq">
+      <b>Ceiling (optimistic)</b> = Birth registration − Immunization <span class="ev c">CLASS C</span><br>
+      <span style="color:var(--grey);font-size:12px">Assumes every unvaccinated child is registered, so the registry can find all of them and coverage climbs to the registration rate.</span>
+    </div>
+    <div class="eq">
+      <b>Floor (conservative)</b> = (Birth registration − Immunization) − (100 − Birth registration) <span class="ev c">CLASS C</span><br>
+      <span style="color:var(--grey);font-size:12px">Assumes every unregistered child is also unvaccinated, so that whole slice is invisible to the registry and is stripped out of the headroom.</span>
+    </div>
+
+    <p>Worked through: Gabon registers 89.6% of births and immunizes 61%. The gap is 29 points, the unregistered share 10, so even in the worst case linkage is worth about 19 points. Honduras registers 97% and immunizes 75% — a 22-point gap against only 3 points unregistered, so the floor is 19 again, this time capturing nearly the whole gap. That convergence is the point: the higher registration goes, the less the conservative assumption costs you.</p>
+
+    <h2>Turning coverage points into money</h2>
+    <p>Two published parameters multiplied. A benefit–cost ratio for childhood immunization in low- and middle-income countries, and a cost per fully immunized child that converts the ratio into an absolute figure.</p>
+
+    <div class="eq">
+      Children reached = Floor (pp) ÷ 100 × annual birth cohort<br>
+      Gross benefit = Children reached × benefit per child<br>
+      Net benefit = Gross benefit − (Children reached × delivery cost)
+    </div>
+
+    <h3>Every parameter, with its source</h3>
+    <table class="keytab">
+      <thead><tr><th>Parameter</th><th>Value</th><th>Source and class</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Benefit–cost ratio, cost of illness</td>
+          <td>≈20:1</td>
+          <td><span class="ev a">CLASS A</span> <b>Sim SY, Watts E, Constenla D, Brenzel L, Patenaude BN</b> (2020), <i>Health Affairs</i> 39(8):1343–1353. ROI of 26.1 for 2011–20 and 19.8 for 2021–30 across 10 pathogens in 94 countries. Corroborated by <b>Ozawa et al.</b> (2016), <i>Health Affairs</i> 35(2):199–207, at about 16×. Both define ROI as net benefit over cost, so the benefit–cost ratio is roughly one higher.</td>
+        </tr>
+        <tr>
+          <td>Benefit–cost ratio, value of a statistical life</td>
+          <td>≈50:1</td>
+          <td><span class="ev a">CLASS A</span> <b>Sim et al.</b> (2020), same paper: 51.0 for 2011–20 and 52.2 for 2021–30. <b>Ozawa et al.</b> (2016) report 44× on a full-income approach. Wider uncertainty and a contested basis, so it belongs in sensitivity rather than a headline.</td>
+        </tr>
+        <tr>
+          <td>Cost per fully immunized child</td>
+          <td>$27 central</td>
+          <td><span class="ev a">CLASS A</span> <b>Brenzel L</b> (2015), <i>Vaccine</i>: cost per DTP3-vaccinated child of $27. Range confirmed by <b>Portnoy, Vaughan, Clarke-Deelder et al.</b> systematic review: $8.13 to $96.16, mean $40.90, median $24.86. <span class="ev b">CLASS B</span> <b>UNICEF</b> (Aug 2020) costs the full standard schedule at about $53 per child, range $35–91.</td>
+        </tr>
+        <tr>
+          <td>Benefit per child, cost of illness</td>
+          <td>$550</td>
+          <td><span class="ev c">CLASS C</span> Derived here: ratio × central unit cost. Not a published figure.</td>
+        </tr>
+        <tr>
+          <td>Benefit per child, statistical life</td>
+          <td>$1,800</td>
+          <td><span class="ev c">CLASS C</span> Derived here on the same unit cost base. Not a published figure.</td>
+        </tr>
+        <tr>
+          <td>Marginal delivery cost per child</td>
+          <td>$80</td>
+          <td><span class="ev b">CLASS B</span> <b>Clarke-Deelder et al.</b>, evaluation of India's Intensified Mission Indradhanush: incremental cost of about $82.99 per zero-dose child reached, wide uncertainty, cited in the zero-dose delivery cost meta-regression.</td>
+        </tr>
+        <tr>
+          <td>Annual birth cohort</td>
+          <td>Not loaded</td>
+          <td><span class="ev c">CLASS C</span> User-entered. A uniform illustrative value is not a country estimate. Replace with <b>UN World Population Prospects</b> births before any external use.</td>
+        </tr>
+        <tr>
+          <td>Lives-saved conversion</td>
+          <td>Not implemented</td>
+          <td><span class="ev a">CLASS A</span> When built, anchor on <b>Shattock AJ, Johnson HC, Sim SY, et al.</b> (2024), <i>The Lancet</i> 403:2307–2316: 154 million deaths averted since 1974, 146 million in children under five, 66 years of full health gained per death averted, with measles accounting for 93.7 million lives saved.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Three assumptions worth stating out loud</h2>
+
+    <h3>Average cost is not marginal cost <span class="ev c">CLASS C</span></h3>
+    <p>Published ROI ratios are programme averages that include easy-to-reach children. This intervention targets the children the system has been missing, who cost substantially more to find. Benefit per child is broadly unchanged — disease burden averted is a property of the child, not of how hard they were to reach — but cost rises, which is why the model nets out a marginal delivery cost rather than applying the headline ratio unadjusted. On the defaults this pulls the effective return to roughly 7× rather than the published 20×.</p>
+
+    <h3>DPT3 stands in for the full schedule <span class="ev c">CLASS C</span></h3>
+    <p>Benefit figures assume a child the system reaches completes the whole infant schedule, not only the DPT doses. DPT3 is the standard proxy for a child the system has genuinely reached, which makes this defensible, but a strict floor counting only diphtheria, tetanus and pertussis burden would be materially smaller.</p>
+
+    <h3>The registry only helps if identification is the constraint <span class="ev c">CLASS C</span></h3>
+    <p>Every number here assumes a child is unvaccinated because the programme could not find them. Where the real barrier is conflict, supply failure or economic collapse, the registry can locate the child and change nothing. That is why several high-gap countries are set aside by default rather than counted, and why that judgement is a toggle rather than a hidden filter.</p>
+
+    <h2>Data provenance still open</h2>
+    <p>Birth registration and DPT3 rates are used as supplied in the source sheet. Reference years and definitions for the two series still need confirming with Philip — the plot inherits whatever vintage mismatch exists between them, and any figure leaving this model should carry the confirmed years.</p>
+  </div>
+</section>
+
+<script>
+const DATA = [{"c": "Afghanistan", "br": 42.3, "im": 59.0, "src": 0, "note": ""}, {"c": "Albania", "br": 98.4, "im": 97.0, "src": 0, "note": ""}, {"c": "Algeria", "br": 99.6, "im": 92.0, "src": 0, "note": ""}, {"c": "Angola", "br": 25.0, "im": 64.0, "src": 0, "note": ""}, {"c": "Argentina", "br": 99.7, "im": 75.0, "src": 0, "note": ""}, {"c": "Armenia", "br": 99.3, "im": 94.0, "src": 0, "note": ""}, {"c": "Azerbaijan", "br": 93.6, "im": 51.0, "src": 1, "note": "Flagged for immunisation challenges in the source sheet."}, {"c": "Bangladesh", "br": 56.0, "im": 97.0, "src": 0, "note": ""}, {"c": "Belarus", "br": 100.0, "im": 98.0, "src": 0, "note": ""}, {"c": "Belize", "br": 95.7, "im": 88.0, "src": 0, "note": ""}, {"c": "Benin", "br": 85.6, "im": 63.0, "src": 0, "note": ""}, {"c": "Bhutan", "br": 99.9, "im": 98.0, "src": 0, "note": ""}, {"c": "Bolivia", "br": 91.9, "im": 59.0, "src": 0, "note": ""}, {"c": "Bosnia and Herzegovina", "br": 99.5, "im": 79.0, "src": 0, "note": ""}, {"c": "Botswana", "br": 87.5, "im": 95.0, "src": 0, "note": ""}, {"c": "Brazil", "br": 96.4, "im": 91.0, "src": 0, "note": ""}, {"c": "Burkina Faso", "br": 76.9, "im": 91.0, "src": 0, "note": ""}, {"c": "Burundi", "br": 83.5, "im": 89.0, "src": 0, "note": ""}, {"c": "Cabo Verde", "br": 91.4, "im": 93.0, "src": 0, "note": ""}, {"c": "Cambodia", "br": 73.3, "im": 83.0, "src": 0, "note": ""}, {"c": "Cameroon", "br": 61.9, "im": 77.0, "src": 0, "note": ""}, {"c": "Central African Republic", "br": 44.8, "im": 42.0, "src": 0, "note": ""}, {"c": "Chad", "br": 25.7, "im": 68.0, "src": 0, "note": ""}, {"c": "Colombia", "br": 96.8, "im": 89.0, "src": 0, "note": ""}, {"c": "Comoros", "br": 87.3, "im": 75.0, "src": 0, "note": ""}, {"c": "Congo, Dem. Rep.", "br": 40.1, "im": 65.0, "src": 0, "note": ""}, {"c": "Congo, Rep.", "br": 95.9, "im": 78.0, "src": 0, "note": ""}, {"c": "Cuba", "br": 99.8, "im": 99.0, "src": 0, "note": ""}, {"c": "Côte d'Ivoire", "br": 71.7, "im": 77.0, "src": 0, "note": ""}, {"c": "Djibouti", "br": 91.7, "im": 77.0, "src": 0, "note": ""}, {"c": "Dominican Republic", "br": 92.2, "im": 87.0, "src": 0, "note": ""}, {"c": "Ecuador", "br": 87.2, "im": 70.0, "src": 0, "note": ""}, {"c": "Egypt, Arab Rep.", "br": 99.4, "im": 97.0, "src": 0, "note": ""}, {"c": "El Salvador", "br": 91.2, "im": 95.0, "src": 0, "note": ""}, {"c": "Equatorial Guinea", "br": 53.5, "im": 68.0, "src": 0, "note": ""}, {"c": "Eswatini", "br": 53.5, "im": 84.0, "src": 0, "note": ""}, {"c": "Fiji", "br": 86.6, "im": 94.0, "src": 0, "note": ""}, {"c": "Gabon", "br": 89.6, "im": 61.0, "src": 0, "note": ""}, {"c": "Gambia, The", "br": 59.0, "im": 80.0, "src": 0, "note": ""}, {"c": "Georgia", "br": 98.5, "im": 86.0, "src": 0, "note": ""}, {"c": "Ghana", "br": 70.6, "im": 95.0, "src": 0, "note": ""}, {"c": "Guatemala", "br": 96.4, "im": 81.0, "src": 0, "note": ""}, {"c": "Guinea", "br": 62.0, "im": 63.0, "src": 0, "note": ""}, {"c": "Guinea-Bissau", "br": 46.0, "im": 68.0, "src": 0, "note": ""}, {"c": "Haiti", "br": 84.8, "im": 60.0, "src": 0, "note": "Widespread insecurity limits outreach regardless of registry quality."}, {"c": "Honduras", "br": 97.0, "im": 75.0, "src": 0, "note": ""}, {"c": "India", "br": 89.1, "im": 94.0, "src": 0, "note": ""}, {"c": "Indonesia", "br": 77.0, "im": 78.0, "src": 0, "note": ""}, {"c": "Iran, Islamic Rep.", "br": 98.6, "im": 98.0, "src": 0, "note": ""}, {"c": "Iraq", "br": 98.8, "im": 90.0, "src": 0, "note": ""}, {"c": "Jamaica", "br": 98.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Jordan", "br": 98.0, "im": 96.0, "src": 0, "note": ""}, {"c": "Kazakhstan", "br": 99.7, "im": 98.0, "src": 0, "note": ""}, {"c": "Kenya", "br": 66.9, "im": 91.0, "src": 0, "note": ""}, {"c": "Kiribati", "br": 91.6, "im": 94.0, "src": 0, "note": ""}, {"c": "Korea, Dem. People's Rep.", "br": 100.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Kyrgyz Republic", "br": 98.9, "im": 85.0, "src": 0, "note": ""}, {"c": "Lao PDR", "br": 73.0, "im": 67.0, "src": 0, "note": ""}, {"c": "Lebanon", "br": 98.9, "im": 49.0, "src": 0, "note": "Coverage collapse is driven by economic crisis and health-system breakdown, not by inability to locate children."}, {"c": "Lesotho", "br": 44.5, "im": 86.0, "src": 0, "note": ""}, {"c": "Liberia", "br": 66.3, "im": 83.0, "src": 0, "note": ""}, {"c": "Madagascar", "br": 73.8, "im": 60.0, "src": 0, "note": ""}, {"c": "Malawi", "br": 67.2, "im": 91.0, "src": 0, "note": ""}, {"c": "Maldives", "br": 98.8, "im": 99.0, "src": 0, "note": ""}, {"c": "Mali", "br": 86.7, "im": 82.0, "src": 0, "note": ""}, {"c": "Marshall Islands", "br": 83.8, "im": 85.0, "src": 0, "note": ""}, {"c": "Mauritania", "br": 44.8, "im": 86.0, "src": 0, "note": ""}, {"c": "Mexico", "br": 97.0, "im": 78.0, "src": 0, "note": ""}, {"c": "Moldova", "br": 99.6, "im": 86.0, "src": 0, "note": ""}, {"c": "Mongolia", "br": 99.6, "im": 96.0, "src": 0, "note": ""}, {"c": "Montenegro", "br": 99.4, "im": 81.0, "src": 0, "note": ""}, {"c": "Morocco", "br": 96.9, "im": 96.0, "src": 0, "note": ""}, {"c": "Mozambique", "br": 55.0, "im": 70.0, "src": 0, "note": ""}, {"c": "Myanmar", "br": 81.3, "im": 71.0, "src": 0, "note": ""}, {"c": "Namibia", "br": 78.1, "im": 74.0, "src": 0, "note": ""}, {"c": "Nepal", "br": 77.2, "im": 97.0, "src": 0, "note": ""}, {"c": "Nicaragua", "br": 84.7, "im": 89.0, "src": 0, "note": ""}, {"c": "Niger", "br": 63.9, "im": 86.0, "src": 0, "note": ""}, {"c": "Nigeria", "br": 42.6, "im": 67.0, "src": 0, "note": ""}, {"c": "North Macedonia", "br": 99.8, "im": 89.0, "src": 0, "note": ""}, {"c": "Pakistan", "br": 42.2, "im": 87.0, "src": 0, "note": ""}, {"c": "Papua New Guinea", "br": 13.4, "im": 42.0, "src": 0, "note": ""}, {"c": "Paraguay", "br": 71.0, "im": 80.0, "src": 0, "note": ""}, {"c": "Peru", "br": 96.4, "im": 80.0, "src": 0, "note": ""}, {"c": "Philippines", "br": 91.8, "im": 71.0, "src": 0, "note": ""}, {"c": "Rwanda", "br": 85.6, "im": 98.0, "src": 0, "note": ""}, {"c": "Samoa", "br": 66.9, "im": 85.0, "src": 0, "note": ""}, {"c": "Senegal", "br": 78.7, "im": 91.0, "src": 0, "note": ""}, {"c": "Serbia", "br": 99.9, "im": 95.0, "src": 0, "note": ""}, {"c": "Sierra Leone", "br": 90.4, "im": 91.0, "src": 0, "note": ""}, {"c": "Solomon Islands", "br": 88.0, "im": 87.0, "src": 0, "note": ""}, {"c": "Somalia, Fed. Rep.", "br": 5.9, "im": 70.0, "src": 0, "note": ""}, {"c": "South Africa", "br": 88.6, "im": 74.0, "src": 0, "note": ""}, {"c": "South Sudan", "br": 35.4, "im": 73.0, "src": 0, "note": ""}, {"c": "Sri Lanka", "br": 97.2, "im": 97.0, "src": 0, "note": ""}, {"c": "St. Lucia", "br": 92.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Sudan", "br": 67.3, "im": 39.0, "src": 0, "note": ""}, {"c": "Suriname", "br": 98.3, "im": 69.0, "src": 0, "note": ""}, {"c": "Syrian Arab Republic", "br": 96.0, "im": 73.0, "src": 0, "note": "Conflict-affected; access and supply are the binding constraints on coverage."}, {"c": "São Tomé and Principe", "br": 98.6, "im": 87.0, "src": 0, "note": ""}, {"c": "Tajikistan", "br": 95.8, "im": 97.0, "src": 0, "note": ""}, {"c": "Tanzania", "br": 26.4, "im": 83.0, "src": 0, "note": ""}, {"c": "Thailand", "br": 99.8, "im": 92.0, "src": 0, "note": ""}, {"c": "Timor-Leste", "br": 60.4, "im": 83.0, "src": 0, "note": ""}, {"c": "Togo", "br": 82.9, "im": 90.0, "src": 0, "note": ""}, {"c": "Tonga", "br": 97.7, "im": 99.0, "src": 0, "note": ""}, {"c": "Tunisia", "br": 99.9, "im": 97.0, "src": 0, "note": ""}, {"c": "Turkmenistan", "br": 99.9, "im": 98.0, "src": 0, "note": ""}, {"c": "Tuvalu", "br": 87.2, "im": 94.0, "src": 0, "note": ""}, {"c": "Türkiye", "br": 98.4, "im": 99.0, "src": 0, "note": ""}, {"c": "Uganda", "br": 32.2, "im": 91.0, "src": 0, "note": ""}, {"c": "Ukraine", "br": 99.8, "im": 88.0, "src": 0, "note": ""}, {"c": "Uzbekistan", "br": 99.9, "im": 90.0, "src": 0, "note": ""}, {"c": "Vanuatu", "br": 43.4, "im": 71.0, "src": 0, "note": ""}, {"c": "Viet Nam", "br": 96.1, "im": 97.0, "src": 0, "note": ""}, {"c": "West Bank and Gaza", "br": 99.2, "im": 88.0, "src": 0, "note": "Conflict-affected; service delivery is the binding constraint."}, {"c": "Yemen, Rep.", "br": 30.7, "im": 42.0, "src": 0, "note": ""}, {"c": "Zambia", "br": 14.0, "im": 91.0, "src": 0, "note": ""}, {"c": "Zimbabwe", "br": 48.7, "im": 91.0, "src": 0, "note": ""}];
+const $ = id => document.getElementById(id);
+const state = {minBR:90, minGap:10, exFlag:true, names:false, ben:550, basis:'coi', cost:80, cohort:null, over:{}};
+
+const CITES = {
+  coi:'<b>Sim et al.</b> (2020) <i>Health Affairs</i> 39(8): ROI of 19.8–26.1 under cost of illness; <b>Ozawa et al.</b> (2016) <i>Health Affairs</i> 35(2) report ~16×. Applied to a cost per DTP3-vaccinated child of <b>$27</b> (<b>Brenzel</b> 2015, <i>Vaccine</i>). Derived figure — <b>Class C</b>.',
+  vsl:'<b>Sim et al.</b> (2020): ROI of 51.0–52.2 under a value-of-statistical-life approach; <b>Ozawa et al.</b> (2016) report 44× on full income. Same $27 unit cost base. Wider uncertainty and contested basis — show as sensitivity. Derived figure — <b>Class C</b>.'
+};
+const CHAIN = {
+  coi:[['Benefit–cost ratio, cost of illness','≈20 : 1','a','Sim et al. 2020, <i>Health Affairs</i> 39(8) — ROI 19.8–26.1 across 10 pathogens, 94 countries'],
+       ['Cost per fully immunized child','$27','a','Brenzel 2015, <i>Vaccine</i> — cost per DTP3-vaccinated child']],
+  vsl:[['Benefit–cost ratio, statistical life','≈50 : 1','a','Sim et al. 2020 — ROI 51.0–52.2 under VSL'],
+       ['Cost per fully immunized child','$27','a','Brenzel 2015, <i>Vaccine</i> — cost per DTP3-vaccinated child']]
+};
+
+function compute(d){
+  const gap = +(d.br - d.im).toFixed(1);
+  const unreg = +(100 - d.br).toFixed(1);
+  return {...d, gap, unreg, floor:+(gap - unreg).toFixed(1), flagged:!!d.note};
+}
+const ALL = DATA.map(compute);
+
+const selected = () => ALL.filter(d =>
+  d.br >= state.minBR && d.gap >= state.minGap && d.floor > 0 && !(state.exFlag && d.flagged)
+).sort((a,b) => b.floor - a.floor);
+const setAside = () => ALL.filter(d => d.br >= state.minBR && d.gap >= state.minGap && d.floor > 0 && d.flagged);
+const cohortFor = d => state.over[d.c] != null ? state.over[d.c] : state.cohort;
+const money = n => n == null ? '—' :
+  (n >= 1e9 ? '$' + (n/1e9).toFixed(2) + 'bn' : n >= 1e6 ? '$' + (n/1e6).toFixed(1) + 'm' :
+   n >= 1e3 ? '$' + Math.round(n/1e3) + 'k' : '$' + Math.round(n));
+const int = n => n == null ? '—' : Math.round(n).toLocaleString('en-US');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ---------- plot geometry: square plot, optional label column on the right ---------- */
+const PL = 62, PT = 58, PB = 60, S = 470, COLW = 150;
+const px = v => PL + v/100*S;
+const py = v => PT + S - v/100*S;
+const VH = PT + S + PB;
+
+let plotPts = {};
+
+function drawPlot(){
+  const sel = selected(), aside = setAside();
+  const selSet = new Set(sel.map(d => d.c)), asideSet = new Set(aside.map(d => d.c));
+  const b = state.minBR, g = state.minGap;
+
+  const GX = PL + S + 46, GR = GX + COLW - 34;
+  const VW = state.names ? GR + 12 : PL + S + 44;
+  const plot = $('plot');
+  plot.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
+
+  plotPts = {};
+  let s = '';
+
+  /* qualifying region, faintest possible tint */
+  const pts = [[b,0],[b,Math.max(b-g,0)],[100,100-g],[100,0]].map(p => px(p[0])+','+py(p[1])).join(' ');
+  s += `<polygon points="${pts}" fill="rgba(239,118,34,.05)"/>`;
+
+  /* grid + ticks */
+  for(let v = 0; v <= 100; v += 20){
+    s += `<line x1="${px(v)}" y1="${py(0)}" x2="${px(v)}" y2="${py(100)}" stroke="var(--rule)" stroke-width=".6"/>`
+      +  `<line x1="${px(0)}" y1="${py(v)}" x2="${px(100)}" y2="${py(v)}" stroke="var(--rule)" stroke-width=".6"/>`
+      +  `<text class="tick" x="${px(v)}" y="${py(0)+16}" text-anchor="middle">${v}</text>`
+      +  `<text class="tick" x="${px(0)-9}" y="${py(v)+3}" text-anchor="end">${v}</text>`;
+  }
+
+  /* parity line, labelled along itself */
+  s += `<line x1="${px(0)}" y1="${py(0)}" x2="${px(100)}" y2="${py(100)}" stroke="var(--navy)" stroke-width="1" stroke-dasharray="5 4" opacity=".38"/>`;
+  s += `<text class="parity" x="${px(44)}" y="${py(44)-7}" transform="rotate(-45 ${px(44)} ${py(44)-7})" text-anchor="middle">parity · as many vaccinated as registered</text>`;
+
+  /* threshold line */
+  s += `<line x1="${px(b)}" y1="${py(0)}" x2="${px(b)}" y2="${py(100)}" stroke="var(--orange)" stroke-width="1" opacity=".5"/>`;
+
+  /* opportunity zone caption */
+  const wc = (b + 100)/2;
+  s += `<text class="ozone" x="${px(wc)}" y="${py(11)}" text-anchor="middle">THE OPPORTUNITY</text>`
+    +  `<text class="ozonesub" x="${px(wc)}" y="${py(11)+13}" text-anchor="middle">registration ≥ ${b}%, gap ≥ ${g} pp</text>`;
+
+  /* background countries, quiet */
+  ALL.filter(d => !selSet.has(d.c) && !asideSet.has(d.c)).forEach(d => {
+    plotPts[d.c] = {...d, status:'bg'};
+    s += `<circle class="dot bg" data-c="${esc(d.c)}" cx="${px(d.br)}" cy="${py(d.im)}" r="3" fill="var(--grey)" opacity=".2"/>`;
+  });
+
+  /* set aside */
+  aside.forEach(d => {
+    plotPts[d.c] = {...d, status:'aside'};
+    s += `<circle class="dot aside" data-c="${esc(d.c)}" cx="${px(d.br)}" cy="${py(d.im)}" r="4.6" fill="#fff" stroke="var(--caution)" stroke-width="1.5" stroke-dasharray="2.5 2"/>`;
+  });
+
+  /* qualifying dots */
+  sel.forEach(d => {
+    plotPts[d.c] = {...d, status:'sel'};
+    s += `<circle class="dot sel" data-c="${esc(d.c)}" cx="${px(d.br)}" cy="${py(d.im)}" r="4.6" fill="var(--orange)" stroke="#fff" stroke-width="1.3"/>`;
+  });
+
+  /* transparent hit targets on top, for easy hovering */
+  ALL.forEach(d => {
+    if(!plotPts[d.c]) return;
+    s += `<circle class="hit" data-c="${esc(d.c)}" cx="${px(d.br)}" cy="${py(d.im)}" r="9"/>`;
+  });
+
+  /* optional label column outside the plot, ordered top to bottom with leader lines */
+  if(state.names && sel.length){
+    s += `<text class="guthead" x="${GX}" y="${PT-16}">Country</text>`
+      +  `<text class="guthead" x="${GR}" y="${PT-16}" text-anchor="end">Floor</text>`;
+    const placed = sel.map(d => ({d, y:py(d.im)})).sort((a,c) => a.y - c.y);
+    const MIN = 14;
+    for(let i = 1; i < placed.length; i++)
+      if(placed[i].y - placed[i-1].y < MIN) placed[i].y = placed[i-1].y + MIN;
+    const over = placed[placed.length-1].y - py(0);
+    if(over > 0) placed.forEach(p => p.y -= over);
+    const under = (PT + 4) - placed[0].y;
+    if(under > 0) placed.forEach(p => p.y += under);
+    placed.forEach(p => {
+      s += `<path d="M ${px(p.d.br)+6} ${py(p.d.im)} L ${GX-16} ${p.y-3.5} L ${GX-6} ${p.y-3.5}" fill="none" stroke="var(--navy)" stroke-width=".6" opacity=".25"/>`
+        +  `<text class="gutname" x="${GX}" y="${p.y}">${esc(p.d.c)}</text>`
+        +  `<text class="gutval" x="${GR}" y="${p.y}" text-anchor="end">+${p.d.floor.toFixed(1)}</text>`;
+    });
+  }
+
+  /* axes */
+  s += `<line x1="${px(0)}" y1="${py(0)}" x2="${px(100)}" y2="${py(0)}" stroke="var(--ink)"/>`
+    +  `<line x1="${px(0)}" y1="${py(0)}" x2="${px(0)}" y2="${py(100)}" stroke="var(--ink)"/>`
+    +  `<text class="axlabel" x="${px(50)}" y="${py(0)+42}" text-anchor="middle">Birth registration, % of children</text>`
+    +  `<text class="axlabel" x="16" y="${py(50)}" text-anchor="middle" transform="rotate(-90 16 ${py(50)})">DPT3 immunization, % of children</text>`;
+
+  plot.innerHTML = s;
+}
+
+/* ---------- interactive hover tooltip ---------- */
+(function initTip(){
+  const plot = $('plot');
+  const wrap = plot.closest('.plotwrap');
+  const tip = document.createElement('div');
+  tip.className = 'tip';
+  wrap.appendChild(tip);
+  let cur = null, hlEl = null;
+
+  const badge = st => st === 'sel' ? '<span class="badge sel">Qualifying</span>'
+    : st === 'aside' ? '<span class="badge aside">Set aside</span>'
+    : '<span class="badge bg">Below thresholds</span>';
+
+  function html(d){
+    let h = `<div class="tc">${esc(d.c)}</div>${badge(d.status)}`
+      + `<div class="row"><span>Birth registration</span><span>${d.br.toFixed(1)}%</span></div>`
+      + `<div class="row"><span>DPT3 immunization</span><span>${d.im.toFixed(0)}%</span></div>`;
+    if(d.status === 'sel')
+      h += `<div class="lead">A registry could add <b>+${d.floor.toFixed(1)} pp</b> at minimum, up to <b>+${d.gap.toFixed(1)} pp</b> if every unvaccinated child is on record.</div>`;
+    else if(d.status === 'aside')
+      h += `<div class="anote">Set aside — ${esc(d.note)}</div>`;
+    else {
+      const gap = +(d.br - d.im).toFixed(1);
+      h += `<div class="lead" style="color:var(--grey);font-weight:500">` + (gap > 0
+        ? `Registers ${gap.toFixed(1)} pp more children than it vaccinates, but sits outside the current thresholds.`
+        : `Vaccinates at least as many children as it registers — no registry headroom here.`) + `</div>`;
+    }
+    return h;
+  }
+
+  function setHl(c){
+    if(hlEl){ hlEl.classList.remove('hl'); hlEl = null; }
+    if(c){
+      const el = plot.querySelector('.dot[data-c="' + CSS.escape(c) + '"]');
+      if(el){ el.classList.add('hl'); hlEl = el; }
+    }
+  }
+
+  function hide(){ tip.classList.remove('show'); cur = null; setHl(null); }
+
+  plot.addEventListener('pointermove', e => {
+    const t = e.target.closest('.hit');
+    if(!t){ if(cur) hide(); return; }
+    const c = t.getAttribute('data-c'), d = plotPts[c];
+    if(!d){ if(cur) hide(); return; }
+    if(c !== cur){ tip.innerHTML = html(d); setHl(c); cur = c; }
+    tip.classList.add('show');
+    const rect = wrap.getBoundingClientRect();
+    let x = e.clientX - rect.left + 15;
+    let y = e.clientY - rect.top + 15;
+    if(x + tip.offsetWidth > rect.width - 6) x = e.clientX - rect.left - tip.offsetWidth - 15;
+    if(x < 4) x = 4;
+    if(y + tip.offsetHeight > rect.height - 6) y = rect.height - tip.offsetHeight - 6;
+    if(y < 4) y = 4;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  });
+  plot.addEventListener('pointerleave', hide);
+})();
+
+/* ---------- tables ---------- */
+function drawTable1(){
+  const sel = selected();
+  const maxG = Math.max(1, ...sel.map(d => d.gap));
+  $('tbl1').querySelector('tbody').innerHTML = sel.map(d => {
+    const flag = d.flagged ? `<span class="flag" title="${esc(d.note)}">context</span>` : '';
+    return `<tr class="${d.br < 90 ? 'tier2' : ''}">
+      <td class="l name">${esc(d.c)}${flag}</td>
+      <td class="num">${d.br.toFixed(1)}</td><td class="num">${d.im.toFixed(0)}</td>
+      <td class="num">${d.gap.toFixed(1)}</td><td class="num">${d.unreg.toFixed(1)}</td>
+      <td class="num">${d.gap.toFixed(1)}</td><td class="num floorcell">${d.floor.toFixed(1)}</td>
+      <td class="l"><span class="bar"><u style="width:${d.gap/maxG*74}px"></u><i style="width:${d.floor/maxG*74}px"></i></span></td>
+    </tr>`;
+  }).join('');
+  $('empty1').hidden = sel.length > 0;
+  $('tbl1').closest('.scroll').hidden = sel.length === 0;
+
+  const med = a => a.length ? (a.length % 2 ? a[(a.length-1)/2] : (a[a.length/2-1]+a[a.length/2])/2) : 0;
+  $('kN').textContent = sel.length;
+  $('kMed').textContent = med(sel.map(d => d.floor).sort((x,y) => x-y)).toFixed(1);
+  $('kOpt').textContent = med(sel.map(d => d.gap).sort((x,y) => x-y)).toFixed(1);
+  $('kFlag').textContent = setAside().length;
+}
+
+function drawTable2(){
+  const sel = selected();
+  const tb = $('tbl2').querySelector('tbody');
+  let tK = 0, tG = 0, tC = 0, any = false;
+
+  tb.innerHTML = sel.map(d => {
+    const coh = cohortFor(d);
+    let kids = null, gross = null, cost = null, net = null;
+    if(coh != null && coh > 0){
+      any = true;
+      kids = d.floor/100 * coh; gross = kids*state.ben; cost = kids*state.cost; net = gross - cost;
+      tK += kids; tG += gross; tC += cost;
+    }
+    const val = state.over[d.c] != null ? state.over[d.c] : '';
+    return `<tr>
+      <td class="l name">${esc(d.c)}</td>
+      <td class="num floorcell">${d.floor.toFixed(1)}</td>
+      <td class="l"><input type="number" min="0" step="1000" data-c="${esc(d.c)}" value="${val}" placeholder="${state.cohort ?? '—'}" aria-label="Annual births for ${esc(d.c)}"></td>
+      <td class="num ${kids==null?'dash':''}">${int(kids)}</td>
+      <td class="num ${gross==null?'dash':''}">${money(gross)}</td>
+      <td class="num ${cost==null?'dash':''}">${money(cost)}</td>
+      <td class="num floorcell">${money(net)}</td>
+    </tr>`;
+  }).join('');
+
+  $('empty2').hidden = sel.length > 0;
+  $('tbl2').closest('.scroll').hidden = sel.length === 0;
+  $('cohortWarn').hidden = any;
+  $('mKids').textContent = any ? int(tK) : '—';
+  $('mGross').textContent = any ? money(tG) : '—';
+  $('mNet').textContent = any ? money(tG - tC) : '—';
+  $('mBCR').textContent = (any && tC > 0) ? (tG/tC).toFixed(1) + '×' : '—';
+
+  tb.querySelectorAll('input').forEach(inp => inp.addEventListener('change', e => {
+    const v = e.target.value.trim();
+    if(v === '') delete state.over[e.target.dataset.c];
+    else state.over[e.target.dataset.c] = Math.max(0, +v);
+    render();
+  }));
+
+  $('paramEcho').innerHTML = `
+    Basis — <b>${state.basis === 'coi' ? 'cost of illness' : 'value of a statistical life'}</b><br>
+    Benefit per child — <b>$${state.ben.toLocaleString('en-US')}</b><br>
+    Delivery cost per child — <b>$${state.cost.toLocaleString('en-US')}</b><br>
+    Uniform cohort — <b>${state.cohort ? state.cohort.toLocaleString('en-US') : 'not set'}</b><br>
+    Country overrides — <b>${Object.keys(state.over).length}</b><br>
+    Registration ≥ <b>${state.minBR}%</b>, gap ≥ <b>${state.minGap} pp</b>`;
+}
+
+function drawChain(){
+  const rows = CHAIN[state.basis];
+  let s = '';
+  rows.forEach((r,i) => {
+    s += `<div class="step"><span class="qty">${r[1]}</span>${r[0]} <span class="ev ${r[2]}">CLASS ${r[2].toUpperCase()}</span>
+          <span class="cite">${r[3]}</span></div>`;
+    if(i < rows.length-1) s += `<div class="op">×</div>`;
+  });
+  s += `<div class="out"><span class="qty">$${state.ben.toLocaleString('en-US')}</span>
+        benefit per additional child <span class="ev c">CLASS C</span>
+        <span class="cite">Derived by this model from the inputs above. Adjustable, and not itself a published figure.</span></div>`;
+  $('chain').innerHTML = s;
+}
+
+const render = () => { drawPlot(); drawTable1(); drawTable2(); drawChain(); };
+
+/* ---------- controls ---------- */
+$('sBR').addEventListener('input', e => { state.minBR = +e.target.value; $('vBR').textContent = state.minBR + '%'; render(); });
+$('sGap').addEventListener('input', e => { state.minGap = +e.target.value; $('vGap').textContent = state.minGap + ' pp'; render(); });
+$('cFlag').addEventListener('change', e => { state.exFlag = e.target.checked; render(); });
+$('cNames').addEventListener('change', e => { state.names = e.target.checked; render(); });
+
+
+function setBasis(b){
+  state.basis = b;
+  state.ben = b === 'coi' ? 550 : 1800;
+  $('nBen').value = state.ben;
+  $('bCOI').setAttribute('aria-pressed', b === 'coi');
+  $('bVSL').setAttribute('aria-pressed', b === 'vsl');
+  $('benHint').innerHTML = b === 'coi'
+    ? 'Averted treatment costs and caregiver productivity losses. The narrower, more defensible basis — use this for funder-facing figures.'
+    : 'Adds the monetized value people place on survival and health. Larger and more contested — show it as a sensitivity, not a headline.';
+  $('benCite').innerHTML = CITES[b];
+  render();
+}
+$('bCOI').addEventListener('click', () => setBasis('coi'));
+$('bVSL').addEventListener('click', () => setBasis('vsl'));
+$('nBen').addEventListener('input', e => { state.ben = Math.max(0, +e.target.value || 0); render(); });
+$('nCost').addEventListener('input', e => { state.cost = Math.max(0, +e.target.value || 0); render(); });
+$('nCohort').addEventListener('input', e => {
+  const v = e.target.value.trim();
+  state.cohort = v === '' ? null : Math.max(0, +v);
+  render();
+});
+$('clearC').addEventListener('click', () => { state.over = {}; state.cohort = null; $('nCohort').value = ''; render(); });
+
+$('dl').addEventListener('click', () => {
+  const sel = selected();
+  const lines = [['Country','Birth registration %','DPT3 immunization %','Gap (ceiling pp)','Unregistered %','Floor (conservative pp)','Births per year','Children reached','Gross benefit USD','Delivery cost USD','Net benefit USD','Context flag'].join(',')];
+  sel.forEach(d => {
+    const coh = cohortFor(d);
+    const kids = coh ? d.floor/100*coh : '';
+    const gross = kids === '' ? '' : Math.round(kids*state.ben);
+    const cost = kids === '' ? '' : Math.round(kids*state.cost);
+    lines.push([`"${d.c}"`, d.br, d.im, d.gap, d.unreg, d.floor, coh ?? '',
+      kids === '' ? '' : Math.round(kids), gross, cost, gross === '' ? '' : gross - cost, `"${d.note}"`].join(','));
+  });
+  lines.push('', `"Basis","${state.basis === 'coi' ? 'Cost of illness' : 'Value of a statistical life'}"`,
+    `"Benefit per child USD",${state.ben},"Class C - derived from Sim et al 2020 ratio and Brenzel 2015 unit cost"`,
+    `"Delivery cost per child USD",${state.cost},"Class B - Clarke-Deelder et al Mission Indradhanush"`,
+    `"Min birth registration %",${state.minBR}`, `"Min gap pp",${state.minGap}`,
+    `"Note","Birth cohort figures are user-entered. Uniform illustrative values are not country estimates. Benefits accrue to governments and immunization programmes, not to Vital Strategies."`);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'}));
+  a.download = 'crvs_immunization_linkage_scenarios.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => {
+    const on = x === t;
+    x.setAttribute('aria-selected', on);
+    $(x.getAttribute('aria-controls')).hidden = !on;
+  });
+}));
+
+setBasis('coi');
+</script>
+</body>
+</html>
