@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CRVS–Immunization Linkage Model | Vital Strategies</title>
+<title>CRVS linkage models | Vital Strategies</title>
+<meta name="description" content="Two working models of what linking civil registration to service delivery could deliver: birth registries to immunisation programmes, and death registries to pension payrolls.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;800&display=swap" rel="stylesheet">
@@ -178,297 +179,698 @@ button.act:hover{background:var(--navy); color:#fff}
 .actions{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<style>
+.ev.d{background:var(--orange); color:#fff}
+.ctl .val{margin-left:8px}
+.check .hint{display:block}
+select{width:100%; font-family:inherit; font-size:13px; padding:7px 9px; border:1px solid var(--rule); background:#fff; color:var(--ink)}
+select:focus-visible{outline:2px solid var(--orange); outline-offset:1px}
+.ev.e{background:#fff; color:var(--grey); border:1px solid var(--rule)}
+.chain .sub{color:var(--grey); font-weight:300; display:block; margin-top:2px}
+.chain .out.mid{margin-bottom:0; border-bottom:1px solid var(--rule)}
+.gridline{stroke:var(--rule); stroke-width:1}
+.axisline{stroke:var(--grey); stroke-width:1; opacity:.5}
+th.sortable{cursor:pointer}
+th.sortable:hover{color:var(--orange)}
+td.why{white-space:normal; min-width:210px; text-align:left; font-size:11px; color:var(--grey); font-weight:300; line-height:1.45}
+.tabgroup{display:flex; align-items:center; font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; font-weight:700; color:var(--grey); padding:0 10px 0 0; white-space:nowrap}
+.tabgroup.second{border-left:1px solid var(--rule); padding-left:18px; margin-left:8px}
+
+.ev.e{background:#fff; color:var(--grey); border:1px solid var(--rule)}
+.cite{
+  display:block; font-size:10.5px; line-height:1.5; color:var(--navy); font-weight:400;
+  margin-top:6px; padding-left:9px; border-left:2px solid var(--orange);
+}
+.cite i{font-style:italic}
+.cite b{font-weight:600}
+
+/* ---------- derivation chain ---------- */
+.chain{font-size:11.5px; line-height:1.5}
+.chain .step{padding:9px 0; border-bottom:1px dotted var(--rule)}
+.chain .step:last-child{border-bottom:0; padding-bottom:0}
+.chain .qty{font-weight:800; color:var(--navy); font-size:13px; display:block}
+.chain .op{text-align:center; color:var(--orange); font-weight:800; font-size:14px; padding:2px 0}
+.chain .sub{color:var(--grey); font-weight:300; display:block; margin-top:2px}
+.chain .out{background:var(--tint); margin:0 -14px -14px; padding:12px 14px; border-top:2px solid var(--orange)}
+.chain .out .qty{color:var(--orange); font-size:17px}
+.chain .out.mid{margin-bottom:0; border-bottom:1px solid var(--rule)}
+
+/* ---------- plot ---------- */
+.plotwrap{border:1px solid var(--rule); background:#fff; position:relative}
+.plothead{padding:13px 16px; border-bottom:1px solid var(--rule)}
+.plothead .t{font-size:14px; font-weight:800; letter-spacing:-.01em}
+.plothead .s{font-size:11.5px; color:var(--grey); font-weight:300; margin-top:3px; max-width:70ch}
+svg.plot{display:block; width:100%; height:auto}
+.legend{display:flex; flex-wrap:wrap; gap:6px 20px; padding:12px 16px; border-top:1px solid var(--rule); background:var(--tint)}
+.legend div{display:flex; align-items:center; gap:7px; font-size:11px; color:var(--ink)}
+.legend .sw{flex:0 0 auto; width:15px; height:11px; position:relative}
+.tick{font-size:9px; fill:var(--grey); font-weight:300}
+.axlabel{font-size:9.5px; font-weight:600; fill:var(--grey); letter-spacing:.07em; text-transform:uppercase}
+.dotname{font-size:9px; font-weight:600; fill:var(--navy); paint-order:stroke; stroke:#fff; stroke-width:3px; stroke-linejoin:round}
+.ozone{font-size:10.5px; font-weight:800; fill:var(--orange); letter-spacing:.14em}
+.ozonesub{font-size:9px; font-weight:500; fill:var(--orange); opacity:.85; letter-spacing:.02em}
+svg.plot text{pointer-events:none; user-select:none}
+.dot.hl{stroke:var(--navy); stroke-width:2; opacity:1}
+.hit{fill:transparent; cursor:pointer}
+.gridline{stroke:var(--rule); stroke-width:1}
+.axisline{stroke:var(--grey); stroke-width:1; opacity:.5}
+
+/* ---------- plot hover tooltip ---------- */
+.tip{
+  position:absolute; z-index:6; pointer-events:none; left:0; top:0;
+  min-width:158px; max-width:250px;
+  background:#fff; border:1px solid var(--rule); border-top:3px solid var(--orange);
+  box-shadow:0 8px 26px rgba(26,29,38,.17); padding:11px 13px;
+  font-size:11.5px; line-height:1.5;
+  opacity:0; transform:translateY(5px); transition:opacity .12s ease, transform .12s ease;
+}
+.tip.show{opacity:1; transform:none}
+.tip .tc{font-weight:800; color:var(--navy); font-size:13px; letter-spacing:-.01em; margin-bottom:5px}
+.tip .badge{display:inline-block; font-size:8.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; margin-bottom:8px}
+.tip .badge.sel{background:var(--orange); color:#fff}
+.tip .badge.aside{background:#fff; color:var(--caution); border:1px solid var(--caution)}
+.tip .badge.bg{background:var(--tint); color:var(--grey)}
+.tip .row{display:flex; justify-content:space-between; gap:16px; padding:1px 0}
+.tip .row span:first-child{color:var(--grey); font-weight:400}
+.tip .row span:last-child{font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums}
+.tip .lead{margin-top:8px; padding-top:8px; border-top:1px dotted var(--rule); color:var(--navy); font-weight:600; font-size:11px}
+.tip .lead b{color:var(--orange); font-weight:800}
+.tip .anote{margin-top:8px; padding-top:8px; border-top:1px dotted var(--rule); color:var(--caution); font-size:10.5px; line-height:1.45; font-weight:400}
+
+/* ---------- counters ---------- */
+.counts{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-bottom:20px}
+.counts div{background:#fff; padding:13px 14px}
+.counts .k{font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--grey); font-weight:600}
+.counts .v{font-size:26px; font-weight:800; letter-spacing:-.03em; color:var(--navy); line-height:1.15; margin-top:3px}
+.counts .v.acc{color:var(--orange)}
+.counts .u{font-size:11px; color:var(--grey); font-weight:300}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto; border:1px solid var(--rule)}
+table{border-collapse:collapse; width:100%; font-size:12.5px; min-width:660px}
+th{text-align:right; font-size:10px; letter-spacing:.09em; text-transform:uppercase; font-weight:600; color:var(--navy); background:var(--tint); padding:9px 10px; border-bottom:1px solid var(--rule); white-space:nowrap; vertical-align:bottom}
+th.l,td.l{text-align:left}
+th.sortable{cursor:pointer}
+th.sortable:hover{color:var(--orange)}
+td{padding:8px 10px; border-bottom:1px solid var(--rule); text-align:right; white-space:nowrap}
+tbody tr:hover{background:var(--navy-08)}
+td.name{font-weight:600; white-space:normal; min-width:150px}
+.floorcell{font-weight:800; color:var(--orange)}
+.bar{display:inline-block; height:9px; background:var(--tint); position:relative; vertical-align:middle; width:74px; margin-right:7px}
+.bar i{position:absolute; left:0; top:0; height:100%; background:var(--orange); display:block}
+.bar u{position:absolute; left:0; top:0; height:100%; background:var(--orange-pale); display:block; text-decoration:none}
+.flag{display:inline-block; font-size:9px; font-weight:700; color:var(--caution); border:1px solid var(--caution); padding:1px 5px; margin-left:6px; vertical-align:middle; border-radius:2px; cursor:help}
+td input{width:88px; text-align:right; padding:4px 6px; font-size:12px}
+.dash{color:var(--grey); font-weight:300}
+td.why{white-space:normal; min-width:210px; text-align:left; font-size:11px; color:var(--grey); font-weight:300; line-height:1.45}
+
+/* ---------- notes / prose ---------- */
+.note{border-left:3px solid var(--orange); background:#FFF9F4; padding:12px 15px; font-size:12.5px; margin:20px 0; line-height:1.55}
+.note strong{color:var(--navy)}
+.note.warn{border-left-color:var(--caution); background:#FDF4F3}
+.note .cite{margin-top:8px}
+.empty{padding:34px 20px; text-align:center; color:var(--grey); font-size:13px; border:1px dashed var(--rule)}
+.prose{max-width:80ch}
+.prose h2{font-size:19px; font-weight:800; margin:30px 0 10px; color:var(--navy)}
+.prose h2:first-child{margin-top:4px}
+.prose h3{font-size:13.5px; font-weight:700; margin:20px 0 6px}
+.prose p{font-size:13.5px; margin:0 0 11px; line-height:1.62}
+.prose li{font-size:13.5px; margin-bottom:9px; line-height:1.58}
+.eq{background:var(--tint); border:1px solid var(--rule); border-left:3px solid var(--navy); padding:12px 15px; margin:12px 0; font-size:13px}
+.eq b{color:var(--navy)}
+.eq .cite{border-left-color:var(--navy)}
+.keytab{width:100%; border-collapse:collapse; font-size:12.5px; margin:14px 0; min-width:0}
+.keytab th{text-align:left}
+.keytab td{text-align:left; white-space:normal; vertical-align:top; line-height:1.5}
+.keytab td:first-child{font-weight:600; width:31%}
+button.act{appearance:none; border:1px solid var(--navy); background:#fff; color:var(--navy); font-family:inherit; font-size:12px; font-weight:600; padding:8px 15px; cursor:pointer}
+button.act:hover{background:var(--navy); color:#fff}
+.actions{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
 </head>
 <body>
-
 <header class="masthead">
-  <p class="eyebrow">Vital Strategies · CRVS investment case · working model</p>
-  <h1>What could linking birth registries to immunization programmes deliver?</h1>
-  <p>Where registration is high but immunization lags, the state already knows these children exist. The registry can be used as a find-list for the ones missing vaccines. This model sizes that opportunity conservatively and prices it against published evidence.</p>
+  <p class="eyebrow">Vital Strategies &middot; CRVS investment case &middot; working models</p>
+  <h1 id="mh-title">What could linking birth registries to immunization programmes deliver?</h1>
+  <p id="mh-intro">Where registration is high but immunization lags, the state already knows these children exist. The registry can be used as a find-list for the ones missing vaccines. This model sizes that opportunity conservatively and prices it against published evidence.</p>
 </header>
-
 <nav class="tabs" role="tablist">
-  <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true">Where the opportunity is</button>
-  <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false">What it is worth</button>
-  <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false">Method &amp; sources</button>
+  <span class="tabgroup">Immunisation</span>
+  <button aria-controls="p1" aria-selected="true" class="tab" data-model="im" id="t1" role="tab">Where the opportunity is</button>
+  <button aria-controls="p2" aria-selected="false" class="tab" data-model="im" id="t2" role="tab">What it is worth</button>
+  <button aria-controls="p3" aria-selected="false" class="tab" data-model="im" id="t3" role="tab">Method &amp; sources</button>
+  <span class="tabgroup second">Pensions</span>
+  <button aria-controls="dr-p1" aria-selected="false" class="tab" data-model="dr" id="dr-t1" role="tab">Where the exposure is</button>
+  <button aria-controls="dr-p2" aria-selected="false" class="tab" data-model="dr" id="dr-t2" role="tab">What it is worth</button>
+  <button aria-controls="dr-p3" aria-selected="false" class="tab" data-model="dr" id="dr-t3" role="tab">Method &amp; sources</button>
 </nav>
-
-<!-- ============ PANEL 1 ============ -->
-<section class="panel" id="p1" role="tabpanel" aria-labelledby="t1">
-  <div class="rail">
-    <div>
-      <div class="card">
-        <h3>Define the opportunity</h3>
-        <div class="body">
-          <div class="ctl">
-            <label for="sBR">Minimum birth registration <span class="val num" id="vBR">90%</span></label>
-            <input type="range" id="sBR" min="50" max="100" step="1" value="90">
-            <p class="hint">The registry can only reach children recorded in it, so this threshold sets how much of the case rests on registry data actually existing.</p>
-          </div>
-          <div class="ctl">
-            <label for="sGap">Minimum coverage gap <span class="val num" id="vGap">10 pp</span></label>
-            <input type="range" id="sGap" min="0" max="45" step="1" value="10">
-            <p class="hint">Registration minus immunization. Below this the headroom is too small to justify the intervention.</p>
-          </div>
-          <div class="ctl">
-            <label class="check">
-              <input type="checkbox" id="cFlag" checked>
-              <span>Set aside countries where access, not identification, is the binding constraint
+<section aria-labelledby="t1" class="panel" id="p1" role="tabpanel">
+<div class="rail">
+<div>
+<div class="card">
+<h3>Define the opportunity</h3>
+<div class="body">
+<div class="ctl">
+<label for="sBR">Minimum birth registration <span class="val num" id="vBR">90%</span></label>
+<input id="sBR" max="100" min="50" step="1" type="range" value="90"/>
+<p class="hint">The registry can only reach children recorded in it, so this threshold sets how much of the case rests on registry data actually existing.</p>
+</div>
+<div class="ctl">
+<label for="sGap">Minimum coverage gap <span class="val num" id="vGap">10 pp</span></label>
+<input id="sGap" max="45" min="0" step="1" type="range" value="10"/>
+<p class="hint">Registration minus immunization. Below this the headroom is too small to justify the intervention.</p>
+</div>
+<div class="ctl">
+<label class="check">
+<input checked="" id="cFlag" type="checkbox"/>
+<span>Set aside countries where access, not identification, is the binding constraint
               <span class="hint" style="margin-top:4px">Conflict, economic collapse or supply failure. A registry can locate these children but cannot get them vaccinated.</span></span>
-            </label>
-          </div>
-          <div class="ctl">
-            <label class="check">
-              <input type="checkbox" id="cNames">
-              <span>Also label the countries beside the plot
+</label>
+</div>
+<div class="ctl">
+<label class="check">
+<input id="cNames" type="checkbox"/>
+<span>Also label the countries beside the plot
               <span class="hint" style="margin-top:4px">Off by default for a cleaner chart — hover any dot to read it. Turn on to see every qualifying country named at once.</span></span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3>Why bracket, not estimate</h3>
-        <div class="body">
-          <p style="font-size:12px;margin:0;line-height:1.6">The sheet gives two separate rates but not the join between them — of the children missing vaccines, how many are registered? That cross-tabulation is unpublished, so a single point estimate is not available and the model brackets the answer instead.
+</label>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h3>Why bracket, not estimate</h3>
+<div class="body">
+<p style="font-size:12px;margin:0;line-height:1.6">The sheet gives two separate rates but not the join between them — of the children missing vaccines, how many are registered? That cross-tabulation is unpublished, so a single point estimate is not available and the model brackets the answer instead.
           <span class="ev c">CLASS C</span></p>
-          <span class="cite">Gap identified in the CRVS evidence review as computable from <b>MICS / DHS microdata</b> at child level. Closing it would collapse this bracket to a point estimate.</span>
-        </div>
+<span class="cite">Gap identified in the CRVS evidence review as computable from <b>MICS / DHS microdata</b> at child level. Closing it would collapse this bracket to a point estimate.</span>
+</div>
+</div>
+</div>
+<div>
+<div class="counts">
+<div><div class="k">Qualifying</div><div class="v num" id="kN">0</div><div class="u">countries</div></div>
+<div><div class="k">Median floor</div><div class="v acc num" id="kMed">0</div><div class="u">pp, conservative</div></div>
+<div><div class="k">Median ceiling</div><div class="v num" id="kOpt">0</div><div class="u">pp, optimistic</div></div>
+<div><div class="k">Set aside</div><div class="v num" id="kFlag">0</div><div class="u">context flags</div></div>
+</div>
+<div class="plotwrap">
+<div class="plothead">
+<div class="t">Where a birth registry could raise immunization coverage</div>
+<div class="s">Each dot is a country: how many of its children are registered at birth (across) against how many are vaccinated (up). <b>Hover any dot to see its numbers</b>, including the coverage a registry could add. Orange dots are the qualifying countries — those with enough registered-but-unvaccinated children for a registry to make a difference.</div>
+</div>
+<svg aria-label="Birth registration against immunization coverage, with the coverage a registry could add" class="plot" id="plot" role="img" viewbox="0 0 680 566"></svg>
+<div class="legend">
+<div><span class="sw" style="background:var(--orange);border-radius:50%;width:11px"></span> Qualifying country</div>
+<div><span class="sw" style="border:1.5px dashed var(--caution);border-radius:50%;width:11px"></span> Set aside — access-constrained</div>
+<div><span class="sw" style="background:var(--grey);opacity:.3;border-radius:50%;width:9px"></span> Other countries</div>
+</div>
+</div>
+<div style="margin-top:22px">
+<div class="scroll">
+<table id="tbl1">
+<thead><tr>
+<th class="l">Country</th>
+<th>Birth reg.</th><th>Immunization</th>
+<th>Gap</th><th>Unregistered</th>
+<th>Ceiling</th><th>Floor</th><th class="l">Floor within ceiling</th>
+</tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="empty" hidden="" id="empty1">No countries meet these thresholds. Loosen the registration or gap setting.</div>
+</div>
+<div class="note">
+<strong>Why the floor is the number to quote.</strong> The ceiling assumes every unvaccinated child is registered and therefore findable. The floor assumes the opposite — that every unregistered child is also unvaccinated and beyond the registry's reach. Where the floor turns negative, the model is saying registration is too low for linkage to guarantee anything, and the country drops out of the list.
       </div>
-    </div>
-
-    <div>
-      <div class="counts">
-        <div><div class="k">Qualifying</div><div class="v num" id="kN">0</div><div class="u">countries</div></div>
-        <div><div class="k">Median floor</div><div class="v acc num" id="kMed">0</div><div class="u">pp, conservative</div></div>
-        <div><div class="k">Median ceiling</div><div class="v num" id="kOpt">0</div><div class="u">pp, optimistic</div></div>
-        <div><div class="k">Set aside</div><div class="v num" id="kFlag">0</div><div class="u">context flags</div></div>
-      </div>
-
-      <div class="plotwrap">
-        <div class="plothead">
-          <div class="t">Where a birth registry could raise immunization coverage</div>
-          <div class="s">Each dot is a country: how many of its children are registered at birth (across) against how many are vaccinated (up). <b>Hover any dot to see its numbers</b>, including the coverage a registry could add. Orange dots are the qualifying countries — those with enough registered-but-unvaccinated children for a registry to make a difference.</div>
-        </div>
-        <svg class="plot" id="plot" viewBox="0 0 680 566" role="img" aria-label="Birth registration against immunization coverage, with the coverage a registry could add"></svg>
-        <div class="legend">
-          <div><span class="sw" style="background:var(--orange);border-radius:50%;width:11px"></span> Qualifying country</div>
-          <div><span class="sw" style="border:1.5px dashed var(--caution);border-radius:50%;width:11px"></span> Set aside — access-constrained</div>
-          <div><span class="sw" style="background:var(--grey);opacity:.3;border-radius:50%;width:9px"></span> Other countries</div>
-        </div>
-      </div>
-
-      <div style="margin-top:22px">
-        <div class="scroll">
-          <table id="tbl1">
-            <thead><tr>
-              <th class="l">Country</th>
-              <th>Birth reg.</th><th>Immunization</th>
-              <th>Gap</th><th>Unregistered</th>
-              <th>Ceiling</th><th>Floor</th><th class="l">Floor within ceiling</th>
-            </tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="empty" id="empty1" hidden>No countries meet these thresholds. Loosen the registration or gap setting.</div>
-      </div>
-
-      <div class="note">
-        <strong>Why the floor is the number to quote.</strong> The ceiling assumes every unvaccinated child is registered and therefore findable. The floor assumes the opposite — that every unregistered child is also unvaccinated and beyond the registry's reach. Where the floor turns negative, the model is saying registration is too low for linkage to guarantee anything, and the country drops out of the list.
-      </div>
-    </div>
-  </div>
+</div>
+</div>
 </section>
-
-<!-- ============ PANEL 2 ============ -->
-<section class="panel" id="p2" role="tabpanel" aria-labelledby="t2" hidden>
-  <div class="rail">
-    <div>
-      <div class="card">
-        <h3>Valuation basis</h3>
-        <div class="body">
-          <div class="ctl">
-            <label>Coverage scenario</label>
-            <div class="seg" role="group" aria-label="Coverage scenario">
-              <button id="bFloor" aria-pressed="true">Conservative · floor</button>
-              <button id="bCeil" aria-pressed="false">Optimistic · ceiling</button>
-            </div>
-            <p class="hint" id="scenHint">Conservative floor: assumes every unregistered child is also unvaccinated and beyond the registry's reach. This is the figure the model recommends quoting.</p>
-          </div>
-
-          <div class="ctl">
-            <label>Benefit per additional child</label>
-            <div class="seg" role="group" aria-label="Valuation approach">
-              <button id="bCOI" aria-pressed="true">Cost of illness</button>
-              <button id="bVSL" aria-pressed="false">Statistical life</button>
-            </div>
-            <input type="number" id="nBen" value="550" min="0" step="25" style="margin-top:8px" aria-label="Benefit per child in US dollars">
-            <p class="hint" id="benHint">Averted treatment costs and caregiver productivity losses. The narrower, more defensible basis — use this for funder-facing figures.</p>
-            <span class="cite" id="benCite"></span>
-          </div>
-
-          <div class="ctl">
-            <label for="nCost">Delivery cost per child reached <span class="ev b">CLASS B</span></label>
-            <input type="number" id="nCost" value="80" min="0" step="5">
-            <p class="hint">Marginal cost of reaching a child the system has been missing, not the programme average. Set to 0 to show gross benefit only.</p>
-            <span class="cite"><b>Clarke-Deelder et al.</b>, cost evaluation of India's Intensified Mission Indradhanush: incremental cost of roughly <b>$83 per zero-dose child reached</b>, with wide uncertainty. Programme-average costs would understate what these specific children cost to find.</span>
-          </div>
-
-          <div class="ctl">
-            <label for="nCohort">Illustrative annual birth cohort <span class="ev c">CLASS C</span></label>
-            <input type="number" id="nCohort" placeholder="e.g. 100000" min="0" step="10000">
-            <p class="hint">Applied uniformly to every country so the arithmetic can be demonstrated. It is <b>not</b> a country estimate. Override per country in the table, or load UN World Population Prospects births before this goes anywhere external.</p>
-          </div>
-        </div>
+<section aria-labelledby="t2" class="panel" hidden="" id="p2" role="tabpanel">
+<div class="rail">
+<div>
+<div class="card">
+<h3>Valuation basis</h3>
+<div class="body">
+<div class="ctl">
+<label>Coverage scenario</label>
+<div aria-label="Coverage scenario" class="seg" role="group">
+<button aria-pressed="true" id="bFloor">Conservative · floor</button>
+<button aria-pressed="false" id="bCeil">Optimistic · ceiling</button>
+</div>
+<p class="hint" id="scenHint">Conservative floor: assumes every unregistered child is also unvaccinated and beyond the registry's reach. This is the figure the model recommends quoting.</p>
+</div>
+<div class="ctl">
+<label>Benefit per additional child</label>
+<div aria-label="Valuation approach" class="seg" role="group">
+<button aria-pressed="true" id="bCOI">Cost of illness</button>
+<button aria-pressed="false" id="bVSL">Statistical life</button>
+</div>
+<input aria-label="Benefit per child in US dollars" id="nBen" min="0" step="25" style="margin-top:8px" type="number" value="550"/>
+<p class="hint" id="benHint">Averted treatment costs and caregiver productivity losses. The narrower, more defensible basis — use this for funder-facing figures.</p>
+<span class="cite" id="benCite"></span>
+</div>
+<div class="ctl">
+<label for="nCost">Delivery cost per child reached <span class="ev b">CLASS B</span></label>
+<input id="nCost" min="0" step="5" type="number" value="80"/>
+<p class="hint">Marginal cost of reaching a child the system has been missing, not the programme average. Set to 0 to show gross benefit only.</p>
+<span class="cite"><b>Clarke-Deelder et al.</b>, cost evaluation of India's Intensified Mission Indradhanush: incremental cost of roughly <b>$83 per zero-dose child reached</b>, with wide uncertainty. Programme-average costs would understate what these specific children cost to find.</span>
+</div>
+<div class="ctl">
+<label for="nCohort">Illustrative annual birth cohort <span class="ev c">CLASS C</span></label>
+<input id="nCohort" min="0" placeholder="e.g. 100000" step="10000" type="number"/>
+<p class="hint">Applied uniformly to every country so the arithmetic can be demonstrated. It is <b>not</b> a country estimate. Override per country in the table, or load UN World Population Prospects births before this goes anywhere external.</p>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h3>How the per-child figure is built</h3>
+<div class="body chain" id="chain"></div>
+</div>
+<div class="card" style="margin-top:18px">
+<h3>Live parameters</h3>
+<div class="body" id="paramEcho" style="font-size:12px;color:var(--grey);line-height:1.7"></div>
+</div>
+</div>
+<div>
+<div class="counts">
+<div><div class="k">Children reached</div><div class="v num" id="mKids">—</div><div class="u" id="uKids">per year, conservative</div></div>
+<div><div class="k">Gross benefit</div><div class="v num" id="mGross">—</div><div class="u" id="uGross">per year, conservative</div></div>
+<div><div class="k">Net benefit</div><div class="v acc num" id="mNet">—</div><div class="u">after delivery cost</div></div>
+<div><div class="k">Return</div><div class="v num" id="mBCR">—</div><div class="u">per $1 of delivery</div></div>
+</div>
+<div class="note" id="cohortWarn">
+<strong>No cohort data loaded.</strong> Monetary results stay blank until you enter an illustrative cohort or per-country birth numbers. A blank cell is more useful than an invented one.
       </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3>How the per-child figure is built</h3>
-        <div class="body chain" id="chain"></div>
+<div class="scroll">
+<table id="tbl2">
+<thead><tr>
+<th class="l">Country</th>
+<th id="th2cov">Floor</th><th class="l">Births / yr</th>
+<th>Children reached</th><th>Gross benefit</th><th>Delivery cost</th><th>Net benefit</th>
+</tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="empty" hidden="" id="empty2">No countries meet the thresholds set on the first tab.</div>
+<div class="actions">
+<button class="act" id="dl">Download results as CSV</button>
+<button class="act" id="clearC">Clear entered birth numbers</button>
+</div>
+<div class="note warn">
+<strong>What this model does not claim.</strong> These are the benefits of the additional immunization itself, not of Vital Strategies' contribution to it. Attribution rests with governments and immunization programmes; registry linkage is one enabling input among several. Net benefit must not be presented as a return on Vital's own spend.
       </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3>Live parameters</h3>
-        <div class="body" id="paramEcho" style="font-size:12px;color:var(--grey);line-height:1.7"></div>
-      </div>
-    </div>
-
-    <div>
-      <div class="counts">
-        <div><div class="k">Children reached</div><div class="v num" id="mKids">—</div><div class="u" id="uKids">per year, conservative</div></div>
-        <div><div class="k">Gross benefit</div><div class="v num" id="mGross">—</div><div class="u" id="uGross">per year, conservative</div></div>
-        <div><div class="k">Net benefit</div><div class="v acc num" id="mNet">—</div><div class="u">after delivery cost</div></div>
-        <div><div class="k">Return</div><div class="v num" id="mBCR">—</div><div class="u">per $1 of delivery</div></div>
-      </div>
-
-      <div class="note" id="cohortWarn">
-        <strong>No cohort data loaded.</strong> Monetary results stay blank until you enter an illustrative cohort or per-country birth numbers. A blank cell is more useful than an invented one.
-      </div>
-
-      <div class="scroll">
-        <table id="tbl2">
-          <thead><tr>
-            <th class="l">Country</th>
-            <th id="th2cov">Floor</th><th class="l">Births / yr</th>
-            <th>Children reached</th><th>Gross benefit</th><th>Delivery cost</th><th>Net benefit</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="empty" id="empty2" hidden>No countries meet the thresholds set on the first tab.</div>
-
-      <div class="actions">
-        <button class="act" id="dl">Download results as CSV</button>
-        <button class="act" id="clearC">Clear entered birth numbers</button>
-      </div>
-
-      <div class="note warn">
-        <strong>What this model does not claim.</strong> These are the benefits of the additional immunization itself, not of Vital Strategies' contribution to it. Attribution rests with governments and immunization programmes; registry linkage is one enabling input among several. Net benefit must not be presented as a return on Vital's own spend.
-      </div>
-    </div>
-  </div>
+</div>
+</div>
 </section>
-
-<!-- ============ PANEL 3 ============ -->
-<section class="panel" id="p3" role="tabpanel" aria-labelledby="t3" hidden>
-  <div class="prose">
-
-    <h2>Evidence classes used here</h2>
-    <table class="keytab">
-      <tbody>
-        <tr><td><span class="ev a">CLASS A</span> Peer-reviewed</td><td>Published in a peer-reviewed journal, quoted as the authors report it. Every ratio and unit cost in this model is Class A.</td></tr>
-        <tr><td><span class="ev b">CLASS B</span> Institutional</td><td>Costing studies and institutional publications from UNICEF, Gavi or WHO, and evaluations reported outside peer review.</td></tr>
-        <tr><td><span class="ev c">CLASS C</span> Derived or assumed</td><td>Produced by this model from Class A and B inputs, or an assumption we are making. Never presentable as a published finding.</td></tr>
-      </tbody>
-    </table>
-
-    <h2>The scenario arithmetic</h2>
-    <p>For each country the source sheet gives two marginal rates: birth registration and DPT3 immunization. It does not give the join between them. Without that cross-tabulation a point estimate is not available, so the model brackets the answer.</p>
-
-    <div class="eq">
-      <b>Ceiling (optimistic)</b> = Birth registration − Immunization <span class="ev c">CLASS C</span><br>
-      <span style="color:var(--grey);font-size:12px">Assumes every unvaccinated child is registered, so the registry can find all of them and coverage climbs to the registration rate.</span>
-    </div>
-    <div class="eq">
-      <b>Floor (conservative)</b> = (Birth registration − Immunization) − (100 − Birth registration) <span class="ev c">CLASS C</span><br>
-      <span style="color:var(--grey);font-size:12px">Assumes every unregistered child is also unvaccinated, so that whole slice is invisible to the registry and is stripped out of the headroom.</span>
-    </div>
-
-    <p>Worked through: Gabon registers 89.6% of births and immunizes 61%. The gap is 29 points, the unregistered share 10, so even in the worst case linkage is worth about 19 points. Honduras registers 97% and immunizes 75% — a 22-point gap against only 3 points unregistered, so the floor is 19 again, this time capturing nearly the whole gap. That convergence is the point: the higher registration goes, the less the conservative assumption costs you.</p>
-
-    <h2>Turning coverage points into money</h2>
-    <p>Two published parameters multiplied. A benefit–cost ratio for childhood immunization in low- and middle-income countries, and a cost per fully immunized child that converts the ratio into an absolute figure.</p>
-
-    <div class="eq">
-      Children reached = Floor (pp) ÷ 100 × annual birth cohort<br>
-      Gross benefit = Children reached × benefit per child<br>
+<section aria-labelledby="t3" class="panel" hidden="" id="p3" role="tabpanel">
+<div class="prose">
+<h2>Evidence classes used here</h2>
+<table class="keytab">
+<tbody>
+<tr><td><span class="ev a">CLASS A</span> Peer-reviewed</td><td>Published in a peer-reviewed journal, quoted as the authors report it. Every ratio and unit cost in this model is Class A.</td></tr>
+<tr><td><span class="ev b">CLASS B</span> Institutional</td><td>Costing studies and institutional publications from UNICEF, Gavi or WHO, and evaluations reported outside peer review.</td></tr>
+<tr><td><span class="ev c">CLASS C</span> Derived or assumed</td><td>Produced by this model from Class A and B inputs, or an assumption we are making. Never presentable as a published finding.</td></tr>
+</tbody>
+</table>
+<h2>The scenario arithmetic</h2>
+<p>For each country the source sheet gives two marginal rates: birth registration and DPT3 immunization. It does not give the join between them. Without that cross-tabulation a point estimate is not available, so the model brackets the answer.</p>
+<div class="eq">
+<b>Ceiling (optimistic)</b> = Birth registration − Immunization <span class="ev c">CLASS C</span><br/>
+<span style="color:var(--grey);font-size:12px">Assumes every unvaccinated child is registered, so the registry can find all of them and coverage climbs to the registration rate.</span>
+</div>
+<div class="eq">
+<b>Floor (conservative)</b> = (Birth registration − Immunization) − (100 − Birth registration) <span class="ev c">CLASS C</span><br/>
+<span style="color:var(--grey);font-size:12px">Assumes every unregistered child is also unvaccinated, so that whole slice is invisible to the registry and is stripped out of the headroom.</span>
+</div>
+<p>Worked through: Gabon registers 89.6% of births and immunizes 61%. The gap is 29 points, the unregistered share 10, so even in the worst case linkage is worth about 19 points. Honduras registers 97% and immunizes 75% — a 22-point gap against only 3 points unregistered, so the floor is 19 again, this time capturing nearly the whole gap. That convergence is the point: the higher registration goes, the less the conservative assumption costs you.</p>
+<h2>Turning coverage points into money</h2>
+<p>Two published parameters multiplied. A benefit–cost ratio for childhood immunization in low- and middle-income countries, and a cost per fully immunized child that converts the ratio into an absolute figure.</p>
+<div class="eq">
+      Children reached = Floor (pp) ÷ 100 × annual birth cohort<br/>
+      Gross benefit = Children reached × benefit per child<br/>
       Net benefit = Gross benefit − (Children reached × delivery cost)
     </div>
-
-    <h3>Every parameter, with its source</h3>
-    <table class="keytab">
-      <thead><tr><th>Parameter</th><th>Value</th><th>Source and class</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Benefit–cost ratio, cost of illness</td>
-          <td>≈20:1</td>
-          <td><span class="ev a">CLASS A</span> <b>Sim SY, Watts E, Constenla D, Brenzel L, Patenaude BN</b> (2020), <i>Health Affairs</i> 39(8):1343–1353. ROI of 26.1 for 2011–20 and 19.8 for 2021–30 across 10 pathogens in 94 countries. Corroborated by <b>Ozawa et al.</b> (2016), <i>Health Affairs</i> 35(2):199–207, at about 16×. Both define ROI as net benefit over cost, so the benefit–cost ratio is roughly one higher.</td>
-        </tr>
-        <tr>
-          <td>Benefit–cost ratio, value of a statistical life</td>
-          <td>≈50:1</td>
-          <td><span class="ev a">CLASS A</span> <b>Sim et al.</b> (2020), same paper: 51.0 for 2011–20 and 52.2 for 2021–30. <b>Ozawa et al.</b> (2016) report 44× on a full-income approach. Wider uncertainty and a contested basis, so it belongs in sensitivity rather than a headline.</td>
-        </tr>
-        <tr>
-          <td>Cost per fully immunized child</td>
-          <td>$27 central</td>
-          <td><span class="ev a">CLASS A</span> <b>Brenzel L</b> (2015), <i>Vaccine</i>: cost per DTP3-vaccinated child of $27. Range confirmed by <b>Portnoy, Vaughan, Clarke-Deelder et al.</b> systematic review: $8.13 to $96.16, mean $40.90, median $24.86. <span class="ev b">CLASS B</span> <b>UNICEF</b> (Aug 2020) costs the full standard schedule at about $53 per child, range $35–91.</td>
-        </tr>
-        <tr>
-          <td>Benefit per child, cost of illness</td>
-          <td>$550</td>
-          <td><span class="ev c">CLASS C</span> Derived here: ratio × central unit cost. Not a published figure.</td>
-        </tr>
-        <tr>
-          <td>Benefit per child, statistical life</td>
-          <td>$1,800</td>
-          <td><span class="ev c">CLASS C</span> Derived here on the same unit cost base. Not a published figure.</td>
-        </tr>
-        <tr>
-          <td>Marginal delivery cost per child</td>
-          <td>$80</td>
-          <td><span class="ev b">CLASS B</span> <b>Clarke-Deelder et al.</b>, evaluation of India's Intensified Mission Indradhanush: incremental cost of about $82.99 per zero-dose child reached, wide uncertainty, cited in the zero-dose delivery cost meta-regression.</td>
-        </tr>
-        <tr>
-          <td>Annual birth cohort</td>
-          <td>Not loaded</td>
-          <td><span class="ev c">CLASS C</span> User-entered. A uniform illustrative value is not a country estimate. Replace with <b>UN World Population Prospects</b> births before any external use.</td>
-        </tr>
-        <tr>
-          <td>Lives-saved conversion</td>
-          <td>Not implemented</td>
-          <td><span class="ev a">CLASS A</span> When built, anchor on <b>Shattock AJ, Johnson HC, Sim SY, et al.</b> (2024), <i>The Lancet</i> 403:2307–2316: 154 million deaths averted since 1974, 146 million in children under five, 66 years of full health gained per death averted, with measles accounting for 93.7 million lives saved.</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>Three assumptions worth stating out loud</h2>
-
-    <h3>Average cost is not marginal cost <span class="ev c">CLASS C</span></h3>
-    <p>Published ROI ratios are programme averages that include easy-to-reach children. This intervention targets the children the system has been missing, who cost substantially more to find. Benefit per child is broadly unchanged — disease burden averted is a property of the child, not of how hard they were to reach — but cost rises, which is why the model nets out a marginal delivery cost rather than applying the headline ratio unadjusted. On the defaults this pulls the effective return to roughly 7× rather than the published 20×.</p>
-
-    <h3>DPT3 stands in for the full schedule <span class="ev c">CLASS C</span></h3>
-    <p>Benefit figures assume a child the system reaches completes the whole infant schedule, not only the DPT doses. DPT3 is the standard proxy for a child the system has genuinely reached, which makes this defensible, but a strict floor counting only diphtheria, tetanus and pertussis burden would be materially smaller.</p>
-
-    <h3>The registry only helps if identification is the constraint <span class="ev c">CLASS C</span></h3>
-    <p>Every number here assumes a child is unvaccinated because the programme could not find them. Where the real barrier is conflict, supply failure or economic collapse, the registry can locate the child and change nothing. That is why several high-gap countries are set aside by default rather than counted, and why that judgement is a toggle rather than a hidden filter.</p>
-
-    <h2>Data provenance still open</h2>
-    <p>Birth registration and DPT3 rates are used as supplied in the source sheet. Reference years and definitions for the two series still need confirming with Philip — the plot inherits whatever vintage mismatch exists between them, and any figure leaving this model should carry the confirmed years.</p>
-  </div>
+<h3>Every parameter, with its source</h3>
+<table class="keytab">
+<thead><tr><th>Parameter</th><th>Value</th><th>Source and class</th></tr></thead>
+<tbody>
+<tr>
+<td>Benefit–cost ratio, cost of illness</td>
+<td>≈20:1</td>
+<td><span class="ev a">CLASS A</span> <b>Sim SY, Watts E, Constenla D, Brenzel L, Patenaude BN</b> (2020), <i>Health Affairs</i> 39(8):1343–1353. ROI of 26.1 for 2011–20 and 19.8 for 2021–30 across 10 pathogens in 94 countries. Corroborated by <b>Ozawa et al.</b> (2016), <i>Health Affairs</i> 35(2):199–207, at about 16×. Both define ROI as net benefit over cost, so the benefit–cost ratio is roughly one higher.</td>
+</tr>
+<tr>
+<td>Benefit–cost ratio, value of a statistical life</td>
+<td>≈50:1</td>
+<td><span class="ev a">CLASS A</span> <b>Sim et al.</b> (2020), same paper: 51.0 for 2011–20 and 52.2 for 2021–30. <b>Ozawa et al.</b> (2016) report 44× on a full-income approach. Wider uncertainty and a contested basis, so it belongs in sensitivity rather than a headline.</td>
+</tr>
+<tr>
+<td>Cost per fully immunized child</td>
+<td>$27 central</td>
+<td><span class="ev a">CLASS A</span> <b>Brenzel L</b> (2015), <i>Vaccine</i>: cost per DTP3-vaccinated child of $27. Range confirmed by <b>Portnoy, Vaughan, Clarke-Deelder et al.</b> systematic review: $8.13 to $96.16, mean $40.90, median $24.86. <span class="ev b">CLASS B</span> <b>UNICEF</b> (Aug 2020) costs the full standard schedule at about $53 per child, range $35–91.</td>
+</tr>
+<tr>
+<td>Benefit per child, cost of illness</td>
+<td>$550</td>
+<td><span class="ev c">CLASS C</span> Derived here: ratio × central unit cost. Not a published figure.</td>
+</tr>
+<tr>
+<td>Benefit per child, statistical life</td>
+<td>$1,800</td>
+<td><span class="ev c">CLASS C</span> Derived here on the same unit cost base. Not a published figure.</td>
+</tr>
+<tr>
+<td>Marginal delivery cost per child</td>
+<td>$80</td>
+<td><span class="ev b">CLASS B</span> <b>Clarke-Deelder et al.</b>, evaluation of India's Intensified Mission Indradhanush: incremental cost of about $82.99 per zero-dose child reached, wide uncertainty, cited in the zero-dose delivery cost meta-regression.</td>
+</tr>
+<tr>
+<td>Annual birth cohort</td>
+<td>Not loaded</td>
+<td><span class="ev c">CLASS C</span> User-entered. A uniform illustrative value is not a country estimate. Replace with <b>UN World Population Prospects</b> births before any external use.</td>
+</tr>
+<tr>
+<td>Lives-saved conversion</td>
+<td>Not implemented</td>
+<td><span class="ev a">CLASS A</span> When built, anchor on <b>Shattock AJ, Johnson HC, Sim SY, et al.</b> (2024), <i>The Lancet</i> 403:2307–2316: 154 million deaths averted since 1974, 146 million in children under five, 66 years of full health gained per death averted, with measles accounting for 93.7 million lives saved.</td>
+</tr>
+</tbody>
+</table>
+<h2>Three assumptions worth stating out loud</h2>
+<h3>Average cost is not marginal cost <span class="ev c">CLASS C</span></h3>
+<p>Published ROI ratios are programme averages that include easy-to-reach children. This intervention targets the children the system has been missing, who cost substantially more to find. Benefit per child is broadly unchanged — disease burden averted is a property of the child, not of how hard they were to reach — but cost rises, which is why the model nets out a marginal delivery cost rather than applying the headline ratio unadjusted. On the defaults this pulls the effective return to roughly 7× rather than the published 20×.</p>
+<h3>DPT3 stands in for the full schedule <span class="ev c">CLASS C</span></h3>
+<p>Benefit figures assume a child the system reaches completes the whole infant schedule, not only the DPT doses. DPT3 is the standard proxy for a child the system has genuinely reached, which makes this defensible, but a strict floor counting only diphtheria, tetanus and pertussis burden would be materially smaller.</p>
+<h3>The registry only helps if identification is the constraint <span class="ev c">CLASS C</span></h3>
+<p>Every number here assumes a child is unvaccinated because the programme could not find them. Where the real barrier is conflict, supply failure or economic collapse, the registry can locate the child and change nothing. That is why several high-gap countries are set aside by default rather than counted, and why that judgement is a toggle rather than a hidden filter.</p>
+<h2>Data provenance still open</h2>
+<p>Birth registration and DPT3 rates are used as supplied in the source sheet. Reference years and definitions for the two series still need confirming with Philip — the plot inherits whatever vintage mismatch exists between them, and any figure leaving this model should carry the confirmed years.</p>
+</div>
 </section>
-
+<section aria-labelledby="dr-t1" class="panel" hidden="" id="dr-p1" role="tabpanel">
+<div class="rail">
+<div>
+<div class="card">
+<h3>Define the opportunity</h3>
+<div class="body">
+<div class="ctl">
+<label for="dr-sDeaths">Minimum deaths aged 65+ <span class="val num" id="dr-vDeaths">none</span></label>
+<input id="dr-sDeaths" max="200000" min="0" step="5000" type="range" value="0"/>
+<p class="hint">Below a certain scale the administrative cost of a linkage outweighs anything it could surface. Raise this to see only countries where the volume justifies the build.</p>
+</div>
+<div class="ctl">
+<label for="dr-sCov">Minimum pension coverage <span class="val num" id="dr-vCov">none</span></label>
+<input id="dr-sCov" max="100" min="0" step="5" type="range" value="0"/>
+<p class="hint">The share of people above pensionable age who actually draw a pension. Where this is low, most deaths are of people the payroll never knew.</p>
+</div>
+<div class="ctl">
+<label for="dr-sReg">Minimum death-registration rate <span class="val num" id="dr-vReg">none</span></label>
+<input id="dr-sReg" max="100" min="0" step="5" type="range" value="0"/>
+<p class="hint">A register can only tell the payroll about deaths it has recorded. This is the ceiling on what any linkage can ever see.</p>
+</div>
+<div class="ctl">
+<label class="check">
+<input id="dr-cCompleteness" type="checkbox"/>
+<span>Set aside countries measured only by cause-of-death completeness
+              <span class="hint" style="margin-top:4px">For these countries no coverage figure exists, so a medical-certification rate stands in. It measures something narrower and usually reads far lower than civil registration.</span></span>
+</label>
+</div>
+<div class="ctl">
+<label class="check">
+<input id="dr-cPartial" type="checkbox"/>
+<span>Set aside countries with partial reporting areas
+              <span class="hint" style="margin-top:4px">Where WHO also publishes urban-only or hospital-only records, the national figure may itself be partial.</span></span>
+</label>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h3>Why bracket, not estimate</h3>
+<div class="body">
+<p style="font-size:12px;margin:0;line-height:1.6">To find a payment that continued after a death, the person must have been <b>both</b> registered as dead <b>and</b> drawing a pension. No country publishes that cross-tabulation. What is published is each share separately, so a point estimate is not available and the model brackets the answer instead.
+          <span class="ev c">CLASS C</span></p>
+<span class="cite">Closing this gap needs a <b>historical death-to-beneficiary match</b> inside a single country: its own death register run against its own payment file. That collapses the bracket to a point estimate and moves the whole model to Class A.</span>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h3>The narrow bracket</h3>
+<div class="body">
+<p style="font-size:12px;margin:0;line-height:1.6">Unusually, the bracket is tight. Across the countries here the ceiling exceeds the floor by a median of <b id="dr-spreadMed">—</b>, because the bound collapses whenever either rate approaches 100. <b>The overlap is not where the uncertainty lives.</b> It lives in the four operational assumptions on the next tab, which move the answer by more than an order of magnitude.</p>
+</div>
+</div>
+</div>
+<div>
+<div class="counts">
+<div><div class="k">Assessable</div><div class="v num" id="dr-kN">0</div><div class="u">countries</div></div>
+<div><div class="k">Median floor</div><div class="v acc num" id="dr-kMed">0</div><div class="u">% overlap, conservative</div></div>
+<div><div class="k">Median ceiling</div><div class="v num" id="dr-kCeil">0</div><div class="u">% overlap, optimistic</div></div>
+<div><div class="k">Set aside</div><div class="v num" id="dr-kFlag">0</div><div class="u">measure caveats</div></div>
+</div>
+<div class="plotwrap">
+<div class="plothead">
+<div class="t">Where a death register could tell a payroll something it does not know</div>
+<div class="s">Each dot is a country: how many of its deaths are registered (across) against how many older people draw a pension (up). <b>Hover any dot to see its numbers</b>, including the deaths a linkage would have to review. Dot size is annual deaths at 65 and over. Countries in the top-right corner have both systems working and the largest overlap between them.</div>
+</div>
+<svg aria-label="Death registration against pension coverage, with dot size showing annual deaths aged 65 and over" class="plot" id="dr-plot" role="img" viewbox="0 0 680 470"></svg>
+<div class="legend">
+<div><span class="sw" style="background:var(--orange);border-radius:50%;width:11px"></span> Registration measured as a coverage ratio</div>
+<div><span class="sw" style="border:1.5px dashed var(--caution);border-radius:50%;width:11px"></span> Completeness only — read the rate as a floor</div>
+<div><span class="sw" style="background:var(--navy);opacity:.25;border-radius:50%;width:9px"></span> No pension amount derivable</div>
+</div>
+<div class="tip" id="dr-tip"></div>
+</div>
+<div style="margin-top:22px">
+<div class="scroll">
+<table id="dr-tbl1">
+<thead><tr>
+<th class="l">Country</th>
+<th>Deaths 65+</th><th>Registration</th><th>Pension cov.</th>
+<th>Ceiling</th><th>Floor</th><th class="l">Floor within ceiling</th>
+</tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="empty" hidden="" id="dr-empty1">No countries meet these thresholds. Loosen the deaths, coverage or registration setting.</div>
+</div>
+<div class="note">
+<strong>Why the floor is the number to quote.</strong> The ceiling assumes every pensioner's death is registered, so the two groups overlap as much as arithmetic permits. The floor assumes they avoid each other as far as arithmetic permits. The floor is the only figure that holds whatever the true overlap turns out to be, and where it falls to zero the model is saying registration and pension coverage are together too low to guarantee anything.
+      </div>
+</div>
+</div>
+</section>
+<section aria-labelledby="dr-t2" class="panel" hidden="" id="dr-p2" role="tabpanel">
+<div class="rail">
+<div>
+<div class="card">
+<h3>Valuation basis</h3>
+<div class="body">
+<div class="ctl">
+<label>Overlap scenario</label>
+<div aria-label="Overlap scenario" class="seg" role="group">
+<button aria-pressed="true" id="dr-bFloor">Conservative · floor</button>
+<button aria-pressed="false" id="dr-bCeil">Optimistic · ceiling</button>
+</div>
+<p class="hint" id="dr-scenHint">Conservative floor: the smallest overlap arithmetically possible between registered deaths and pension receipt. This is the figure the model recommends quoting.</p>
+</div>
+<div class="ctl">
+<label>Operational assumptions</label>
+<div aria-label="Assumption scenario" class="seg" role="group">
+<button aria-pressed="false" data-scen="cons">Cautious</button>
+<button aria-pressed="true" data-scen="cent">Central</button>
+<button aria-pressed="false" data-scen="opt">Optimistic</button>
+</div>
+<p class="hint">Presets for the four numbers below. Move any slider and the preset clears — these are your assumptions, not published values.</p>
+</div>
+<div class="ctl">
+<label for="dr-sTimely">Deaths registered in time to act <span class="val num" id="dr-vTimely">80%</span> <span class="ev d">CLASS D</span></label>
+<input id="dr-sTimely" max="100" min="0" step="5" type="range" value="80"/>
+<p class="hint">Registration within a legal deadline is not the same as the record reaching the pension system in time to stop the next payment run.</p>
+</div>
+<div class="ctl">
+<label for="dr-sMatch">Registrations matched to a pension record <span class="val num" id="dr-vMatch">85%</span> <span class="ev d">CLASS D</span></label>
+<input id="dr-sMatch" max="100" min="0" step="5" type="range" value="85"/>
+<p class="hint">Depends on shared identifiers, name conventions and data quality on both sides. Without a national ID in both files this falls a long way.</p>
+</div>
+<div class="ctl">
+<label for="dr-sDelay">Months of payment avoided <span class="val num" id="dr-vDelay">4</span> <span class="ev d">CLASS D</span></label>
+<input id="dr-sDelay" max="18" min="0" step="0.5" type="range" value="4"/>
+<p class="hint">The reduction in delay, not the whole delay. Systems already learn of deaths through survivor claims and proof-of-life campaigns, so only the improvement counts.</p>
+</div>
+<div class="ctl">
+<label for="dr-sStop">Legally stoppable share <span class="val num" id="dr-vStop">70%</span> <span class="ev d">CLASS D</span></label>
+<input id="dr-sStop" max="100" min="0" step="5" type="range" value="70"/>
+<p class="hint">Survivor entitlements, grace periods and pro-rata rules for the month of death mean a substantial part of the window is a legitimate payment.</p>
+</div>
+<div class="ctl">
+<label for="dr-sGhost">Beneficiaries already deceased <span class="val num" id="dr-vGhost">0.5%</span> <span class="ev d">CLASS D</span></label>
+<input id="dr-sGhost" max="5" min="0" step="0.1" type="range" value="0.5"/>
+<p class="hint"><b>The weakest input on this page.</b> The share of the current payroll who have died without the system knowing. Replace with a figure from an actual reconciliation before quoting anything that depends on it.</p>
+</div>
+<div class="ctl">
+<label class="check">
+<input checked="" id="dr-cStock" type="checkbox"/>
+<span>Include the first-year sweep in totals
+              <span class="hint" style="margin-top:4px">A one-off clearance of the accumulated backlog. Large, real, and not repeatable — never annualise it.</span></span>
+</label>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h3>How one country's figure is built</h3>
+<div class="body">
+<select aria-label="Country for the derivation chain" id="dr-chainCountry" style="margin-bottom:12px"></select>
+<div class="chain" id="dr-chain"></div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h3>Live parameters</h3>
+<div class="body" id="dr-paramEcho" style="font-size:12px;color:var(--grey);line-height:1.7"></div>
+</div>
+</div>
+<div>
+<div class="counts">
+<div><div class="k">Deaths linkable</div><div class="v num" id="dr-mDeaths">—</div><div class="u" id="dr-uDeaths">per year, conservative</div></div>
+<div><div class="k">Annual flow</div><div class="v num" id="dr-mFlow">—</div><div class="u">payments during the delay</div></div>
+<div><div class="k">First-year sweep</div><div class="v num" id="dr-mStock">—</div><div class="u">one-off, not repeatable</div></div>
+<div><div class="k">Total, year one</div><div class="v acc num" id="dr-mTotal">—</div><div class="u" id="dr-uTotal">flow plus sweep</div></div>
+</div>
+<div class="note" id="dr-spreadNote"></div>
+<div class="scroll">
+<table id="dr-tbl2">
+<thead><tr>
+<th class="l">Country</th>
+<th id="dr-th2ov">Floor overlap</th><th>Linkable deaths</th>
+<th class="l">Monthly pension</th>
+<th>Annual flow</th><th>First-year sweep</th><th>Total year 1</th>
+<th class="l">Measure / gap</th>
+</tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="empty" hidden="" id="dr-empty2">No countries meet the thresholds set on the first tab.</div>
+<div class="actions">
+<button class="act" id="dr-dl">Download results as CSV</button>
+<button class="act" id="dr-clearO">Clear entered pension amounts</button>
+<div aria-label="Currency" class="seg" role="group" style="margin-left:auto;max-width:190px">
+<button aria-pressed="true" id="dr-bUsd">US dollars</button>
+<button aria-pressed="false" id="dr-bLcu">Local currency</button>
+</div>
+</div>
+<div class="note warn">
+<strong>What this model does not claim.</strong> These are the payments a reconciliation could surface, not payments shown to be continuing after death. Nothing here is fraud, a confirmed overpayment or a realised saving. Attribution rests with governments: a civil registration authority and a pension administrator would have to build and operate the linkage together, and it is one enabling input among several. No figure here should be presented as a return on any single organisation's spend.
+      </div>
+</div>
+</div>
+</section>
+<section aria-labelledby="dr-t3" class="panel" hidden="" id="dr-p3" role="tabpanel">
+<div class="prose">
+<h2>Evidence classes used here</h2>
+<table class="keytab">
+<tbody>
+<tr><td><span class="ev a">CLASS A</span> Programme evidence</td><td>Direct administrative or audited evidence from a national programme. <b>Nothing in this model is Class A yet.</b> That is what a country reconciliation would add, and it is the single upgrade that matters most.</td></tr>
+<tr><td><span class="ev b">CLASS B</span> Institutional</td><td>Official international statistics, quoted as the publisher reports them: UN, WHO and World Bank series.</td></tr>
+<tr><td><span class="ev c">CLASS C</span> Derived</td><td>Produced by this model from Class B inputs by transparent arithmetic. Never presentable as a published finding.</td></tr>
+<tr><td><span class="ev d">CLASS D</span> Assumed</td><td>Entered by you. No published source anchors these, and they drive the answer more than anything else on the page.</td></tr>
+<tr><td><span class="ev e">CLASS E</span> Missing</td><td>Not available, not comparable, or not derivable. Every blank cell is Class E and states its reason.</td></tr>
+</tbody>
+</table>
+<h2>The scenario arithmetic</h2>
+<p>For each country the pipeline gives two marginal rates: the share of deaths registered, and the share of people above pensionable age receiving a pension. It does not give the join between them. Without that cross-tabulation a point estimate is not available, so the model brackets the answer.</p>
+<div class="eq">
+<b>Overlap ceiling (optimistic)</b> = MIN(registration, pension coverage) <span class="ev c">CLASS C</span><br/>
+<span style="color:var(--grey);font-size:12px">Assumes registration and pension receipt coincide as far as arithmetic permits, so every pensioner's death is a registered death.</span>
+</div>
+<div class="eq">
+<b>Overlap floor (conservative)</b> = MAX(0, registration + pension coverage − 100) <span class="ev c">CLASS C</span><br/>
+<span style="color:var(--grey);font-size:12px">Assumes the two groups avoid each other as far as arithmetic permits. Whatever is left over must overlap, because the two shares are together too large to fit inside 100.</span>
+</div>
+<p>Worked through: a country registering 90% of deaths and paying a pension to 80% of older people must have at least 70% of its deaths falling on pension recipients, because the two groups are too large to avoid one another. At most 80% can, which happens only if every pensioner's death is registered. The truth sits in a ten-point band and the floor holds regardless.</p>
+<p><b>The bracket is unusually tight here.</b> Across the assessable countries the ceiling exceeds the floor by a median of about 1.00×, and by more than 2× for only four of them, because the bound collapses whenever either rate approaches 100. That is worth saying plainly: the analytically hard part of this model turns out not to be where the uncertainty lives.</p>
+<h2>Turning deaths into money</h2>
+<p>Unlike a vaccination, a stopped payment needs no benefit–cost literature to value it. The saving is the payment itself. What the model must supply instead is how many payments continue, and for how long.</p>
+<div class="eq">
+      Linkable deaths = deaths aged 65+ × overlap ÷ 100<br/>
+      Timely and matchable = linkable deaths × timely registration ÷ 100 × match rate ÷ 100<br/>
+<b>Annual flow exposure</b> = timely and matchable × monthly pension × months avoided × legally stoppable ÷ 100<br/>
+<b>First-year sweep</b> = beneficiaries × already-deceased share ÷ 100 × monthly pension × 12 × legally stoppable ÷ 100
+    </div>
+<p>The flow recurs every year. The sweep does not: it clears a backlog that has accumulated once and cannot accumulate again while the linkage runs. They are reported separately for that reason, and the sweep should never be annualised.</p>
+<h3>Every parameter, with its source</h3>
+<table class="keytab">
+<thead><tr><th>Parameter</th><th>Value</th><th>Source and class</th></tr></thead>
+<tbody>
+<tr>
+<td>Deaths aged 65 and over</td>
+<td>per country</td>
+<td><span class="ev b">CLASS B</span> <b>UN DESA Population Division</b>, <i>World Population Prospects 2024</i>, deaths by single age and sex, medium variant. Single ages summed from 65 upwards. The Data Portal API now requires an access token, so the official bulk files are used and their exact filenames and hashes recorded.</td>
+</tr>
+<tr>
+<td>Death-registration rate</td>
+<td>per country</td>
+<td><span class="ev c">CLASS C</span> <b>No official source publishes national death-registration coverage per country.</b> The WHO Mortality Database availability file carries only country, year, list and format. The model therefore divides WHO registered deaths by UN WPP expected deaths for the same year and caps the ratio at 100. Where even that is unavailable it falls back to <b>WHO Global Health Observatory</b> cause-of-death completeness <span class="ev b">CLASS B</span>, which measures medical certification rather than civil registration and reads far lower.</td>
+</tr>
+<tr>
+<td>Pension coverage above pensionable age</td>
+<td>per country</td>
+<td><span class="ev b">CLASS B</span> <b>UN Global SDG Indicators Database</b>, series SI_COV_PENSN, source agency <b>ILO</b>. Latest both-sexes observation, preferring country-reported over modelled data for the same year. This is pension <i>receipt</i>, not contributor coverage.</td>
+</tr>
+<tr>
+<td>Average monthly pension</td>
+<td>35 of 143 countries</td>
+<td><span class="ev c">CLASS C</span> <b>World Bank ASPIRE</b> pension expenditure divided by matched beneficiaries of the same pillar and year. Expenditure is published only as a share of GDP, so the currency total is reconstructed with <b>World Bank NY.GDP.MKTP.CN</b> for the same year. Contributory expenditure covers old-age, disability and survivor risks jointly, so the denominator is all beneficiaries of the pillar — never the old-age subset, which would overstate the average.</td>
+</tr>
+<tr>
+<td>Exchange rate</td>
+<td>per country</td>
+<td><span class="ev c">CLASS C</span> <b>World Bank PA.NUS.FCRF</b>, market rate for the pension's own reference year. No purchasing-power adjustment is applied. Where a country has re-denominated and the GDP series disagrees with the stated currency code, the code is withheld rather than guessed.</td>
+</tr>
+<tr>
+<td>Deaths registered in time to act</td>
+<td>set by you</td>
+<td><span class="ev d">CLASS D</span> No published source. Country-level registration timeliness exists in some CRVS assessments and in the UNSD Demographic Yearbook's deaths-by-year-of-registration tables; neither is assembled into a comparable series.</td>
+</tr>
+<tr>
+<td>Registrations matched to a pension record</td>
+<td>set by you</td>
+<td><span class="ev d">CLASS D</span> No published source. Obtainable only from an actual linkage programme's own evaluation. This is the parameter most worth going to find.</td>
+</tr>
+<tr>
+<td>Months of payment avoided</td>
+<td>set by you</td>
+<td><span class="ev d">CLASS D</span> No published source. A useful anchor: where a scheme runs annual proof-of-life verification, the current stop delay is bounded by that cycle and averages roughly half of it.</td>
+</tr>
+<tr>
+<td>Legally stoppable share</td>
+<td>set by you</td>
+<td><span class="ev d">CLASS D</span> No published source. Requires a legal review per scheme: survivor entitlements, grace periods and the treatment of the month of death all reduce it well below 100.</td>
+</tr>
+<tr>
+<td>Beneficiaries already deceased</td>
+<td>set by you</td>
+<td><span class="ev d">CLASS D</span> No published source, and the weakest input here. Only a completed reconciliation produces this number, and it drives roughly a third of the year-one total.</td>
+</tr>
+<tr>
+<td>Cost of running the linkage</td>
+<td>Not implemented</td>
+<td><span class="ev e">CLASS E</span> The workbook behind this page carries review, operating and implementation cost inputs and computes net benefit and a benefit–cost ratio. They are deliberately absent here: with no defensible cost figure, a net benefit on a public page would read as a finding rather than a scenario.</td>
+</tr>
+</tbody>
+</table>
+<h2>Four assumptions worth stating out loud</h2>
+<h3>Pension coverage is measured among the living <span class="ev c">CLASS C</span></h3>
+<p>The share of older people receiving a pension is measured across the living population above pensionable age. This model applies it to people who die. No publisher cross-tabulates pension receipt against deaths, so the substitution is forced by the absence of data rather than chosen — but if pension recipients die at a materially different rate from non-recipients, and in most countries they will, the figure is biased in a direction this model cannot determine. Replace it with a historical death-to-beneficiary match wherever programme data allow.</p>
+<h3>Deaths at 65 and over are not pension-age deaths <span class="ev c">CLASS C</span></h3>
+<p>Statutory pension ages differ, sometimes by a decade and often by sex, and not everyone dying at 65 or over was ever eligible. The underlying dataset holds deaths by five-year age band, so a country-specific threshold can be substituted once reliable retirement-age data are in hand. Until then this is an approximation applied uniformly, which flatters countries with a low pension age and penalises those with a high one.</p>
+<h3>Countries are not measured on a like-for-like basis <span class="ev c">CLASS C</span></h3>
+<p>Most rows use registered deaths divided by expected deaths; a few use cause-of-death completeness. The second measures whether a doctor certified a cause, not whether a death was legally registered, and it can understate registration badly. India appears here at roughly 10% on that basis while its civil registration of deaths is far higher. Every row states which measure it used, and the first tab can set the completeness-only countries aside entirely.</p>
+<h3>The register only helps if the payroll does not already know <span class="ev c">CLASS D</span></h3>
+<p>Every number here assumes payment continued because the pension system had not learned of the death. Where families already report deaths promptly to claim survivor benefits, or where proof-of-life verification runs frequently, the linkage adds little and the months-avoided assumption should fall towards zero. That is why the delay reduction is a slider rather than a fixed parameter, and why the model reports the reduction rather than the full delay.</p>
+<h2>Data provenance still open</h2>
+<p>The largest open item is the death-registration measure. A published national coverage series per country would replace the derived ratio for 140 countries and lift that input from Class C to Class B; the UN Statistics Division Demographic Yearbook carries completeness-of-death-registration tables that have not yet been assembled into a comparable panel. Second is the average pension: 108 assessable countries have no defensible amount, mostly because ASPIRE publishes no beneficiary count for their social pension programmes. Third, and most valuable, is a single country willing to run its own death register against its own payment file, which would convert the entire chain from a bracket into an observation.</p>
+</div>
+</section>
 <script>
+
 const DATA = [{"c": "Afghanistan", "br": 42.3, "im": 59.0, "src": 0, "note": ""}, {"c": "Albania", "br": 98.4, "im": 97.0, "src": 0, "note": ""}, {"c": "Algeria", "br": 99.6, "im": 92.0, "src": 0, "note": ""}, {"c": "Angola", "br": 25.0, "im": 64.0, "src": 0, "note": ""}, {"c": "Argentina", "br": 99.7, "im": 75.0, "src": 0, "note": ""}, {"c": "Armenia", "br": 99.3, "im": 94.0, "src": 0, "note": ""}, {"c": "Azerbaijan", "br": 93.6, "im": 51.0, "src": 1, "note": "Flagged for immunisation challenges in the source sheet."}, {"c": "Bangladesh", "br": 56.0, "im": 97.0, "src": 0, "note": ""}, {"c": "Belarus", "br": 100.0, "im": 98.0, "src": 0, "note": ""}, {"c": "Belize", "br": 95.7, "im": 88.0, "src": 0, "note": ""}, {"c": "Benin", "br": 85.6, "im": 63.0, "src": 0, "note": ""}, {"c": "Bhutan", "br": 99.9, "im": 98.0, "src": 0, "note": ""}, {"c": "Bolivia", "br": 91.9, "im": 59.0, "src": 0, "note": ""}, {"c": "Bosnia and Herzegovina", "br": 99.5, "im": 79.0, "src": 0, "note": ""}, {"c": "Botswana", "br": 87.5, "im": 95.0, "src": 0, "note": ""}, {"c": "Brazil", "br": 96.4, "im": 91.0, "src": 0, "note": ""}, {"c": "Burkina Faso", "br": 76.9, "im": 91.0, "src": 0, "note": ""}, {"c": "Burundi", "br": 83.5, "im": 89.0, "src": 0, "note": ""}, {"c": "Cabo Verde", "br": 91.4, "im": 93.0, "src": 0, "note": ""}, {"c": "Cambodia", "br": 73.3, "im": 83.0, "src": 0, "note": ""}, {"c": "Cameroon", "br": 61.9, "im": 77.0, "src": 0, "note": ""}, {"c": "Central African Republic", "br": 44.8, "im": 42.0, "src": 0, "note": ""}, {"c": "Chad", "br": 25.7, "im": 68.0, "src": 0, "note": ""}, {"c": "Colombia", "br": 96.8, "im": 89.0, "src": 0, "note": ""}, {"c": "Comoros", "br": 87.3, "im": 75.0, "src": 0, "note": ""}, {"c": "Congo, Dem. Rep.", "br": 40.1, "im": 65.0, "src": 0, "note": ""}, {"c": "Congo, Rep.", "br": 95.9, "im": 78.0, "src": 0, "note": ""}, {"c": "Cuba", "br": 99.8, "im": 99.0, "src": 0, "note": ""}, {"c": "Côte d'Ivoire", "br": 71.7, "im": 77.0, "src": 0, "note": ""}, {"c": "Djibouti", "br": 91.7, "im": 77.0, "src": 0, "note": ""}, {"c": "Dominican Republic", "br": 92.2, "im": 87.0, "src": 0, "note": ""}, {"c": "Ecuador", "br": 87.2, "im": 70.0, "src": 0, "note": ""}, {"c": "Egypt, Arab Rep.", "br": 99.4, "im": 97.0, "src": 0, "note": ""}, {"c": "El Salvador", "br": 91.2, "im": 95.0, "src": 0, "note": ""}, {"c": "Equatorial Guinea", "br": 53.5, "im": 68.0, "src": 0, "note": ""}, {"c": "Eswatini", "br": 53.5, "im": 84.0, "src": 0, "note": ""}, {"c": "Fiji", "br": 86.6, "im": 94.0, "src": 0, "note": ""}, {"c": "Gabon", "br": 89.6, "im": 61.0, "src": 0, "note": ""}, {"c": "Gambia, The", "br": 59.0, "im": 80.0, "src": 0, "note": ""}, {"c": "Georgia", "br": 98.5, "im": 86.0, "src": 0, "note": ""}, {"c": "Ghana", "br": 70.6, "im": 95.0, "src": 0, "note": ""}, {"c": "Guatemala", "br": 96.4, "im": 81.0, "src": 0, "note": ""}, {"c": "Guinea", "br": 62.0, "im": 63.0, "src": 0, "note": ""}, {"c": "Guinea-Bissau", "br": 46.0, "im": 68.0, "src": 0, "note": ""}, {"c": "Haiti", "br": 84.8, "im": 60.0, "src": 0, "note": "Widespread insecurity limits outreach regardless of registry quality."}, {"c": "Honduras", "br": 97.0, "im": 75.0, "src": 0, "note": ""}, {"c": "India", "br": 89.1, "im": 94.0, "src": 0, "note": ""}, {"c": "Indonesia", "br": 77.0, "im": 78.0, "src": 0, "note": ""}, {"c": "Iran, Islamic Rep.", "br": 98.6, "im": 98.0, "src": 0, "note": ""}, {"c": "Iraq", "br": 98.8, "im": 90.0, "src": 0, "note": ""}, {"c": "Jamaica", "br": 98.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Jordan", "br": 98.0, "im": 96.0, "src": 0, "note": ""}, {"c": "Kazakhstan", "br": 99.7, "im": 98.0, "src": 0, "note": ""}, {"c": "Kenya", "br": 66.9, "im": 91.0, "src": 0, "note": ""}, {"c": "Kiribati", "br": 91.6, "im": 94.0, "src": 0, "note": ""}, {"c": "Korea, Dem. People's Rep.", "br": 100.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Kyrgyz Republic", "br": 98.9, "im": 85.0, "src": 0, "note": ""}, {"c": "Lao PDR", "br": 73.0, "im": 67.0, "src": 0, "note": ""}, {"c": "Lebanon", "br": 98.9, "im": 49.0, "src": 0, "note": "Coverage collapse is driven by economic crisis and health-system breakdown, not by inability to locate children."}, {"c": "Lesotho", "br": 44.5, "im": 86.0, "src": 0, "note": ""}, {"c": "Liberia", "br": 66.3, "im": 83.0, "src": 0, "note": ""}, {"c": "Madagascar", "br": 73.8, "im": 60.0, "src": 0, "note": ""}, {"c": "Malawi", "br": 67.2, "im": 91.0, "src": 0, "note": ""}, {"c": "Maldives", "br": 98.8, "im": 99.0, "src": 0, "note": ""}, {"c": "Mali", "br": 86.7, "im": 82.0, "src": 0, "note": ""}, {"c": "Marshall Islands", "br": 83.8, "im": 85.0, "src": 0, "note": ""}, {"c": "Mauritania", "br": 44.8, "im": 86.0, "src": 0, "note": ""}, {"c": "Mexico", "br": 97.0, "im": 78.0, "src": 0, "note": ""}, {"c": "Moldova", "br": 99.6, "im": 86.0, "src": 0, "note": ""}, {"c": "Mongolia", "br": 99.6, "im": 96.0, "src": 0, "note": ""}, {"c": "Montenegro", "br": 99.4, "im": 81.0, "src": 0, "note": ""}, {"c": "Morocco", "br": 96.9, "im": 96.0, "src": 0, "note": ""}, {"c": "Mozambique", "br": 55.0, "im": 70.0, "src": 0, "note": ""}, {"c": "Myanmar", "br": 81.3, "im": 71.0, "src": 0, "note": ""}, {"c": "Namibia", "br": 78.1, "im": 74.0, "src": 0, "note": ""}, {"c": "Nepal", "br": 77.2, "im": 97.0, "src": 0, "note": ""}, {"c": "Nicaragua", "br": 84.7, "im": 89.0, "src": 0, "note": ""}, {"c": "Niger", "br": 63.9, "im": 86.0, "src": 0, "note": ""}, {"c": "Nigeria", "br": 42.6, "im": 67.0, "src": 0, "note": ""}, {"c": "North Macedonia", "br": 99.8, "im": 89.0, "src": 0, "note": ""}, {"c": "Pakistan", "br": 42.2, "im": 87.0, "src": 0, "note": ""}, {"c": "Papua New Guinea", "br": 13.4, "im": 42.0, "src": 0, "note": ""}, {"c": "Paraguay", "br": 71.0, "im": 80.0, "src": 0, "note": ""}, {"c": "Peru", "br": 96.4, "im": 80.0, "src": 0, "note": ""}, {"c": "Philippines", "br": 91.8, "im": 71.0, "src": 0, "note": ""}, {"c": "Rwanda", "br": 85.6, "im": 98.0, "src": 0, "note": ""}, {"c": "Samoa", "br": 66.9, "im": 85.0, "src": 0, "note": ""}, {"c": "Senegal", "br": 78.7, "im": 91.0, "src": 0, "note": ""}, {"c": "Serbia", "br": 99.9, "im": 95.0, "src": 0, "note": ""}, {"c": "Sierra Leone", "br": 90.4, "im": 91.0, "src": 0, "note": ""}, {"c": "Solomon Islands", "br": 88.0, "im": 87.0, "src": 0, "note": ""}, {"c": "Somalia, Fed. Rep.", "br": 5.9, "im": 70.0, "src": 0, "note": ""}, {"c": "South Africa", "br": 88.6, "im": 74.0, "src": 0, "note": ""}, {"c": "South Sudan", "br": 35.4, "im": 73.0, "src": 0, "note": ""}, {"c": "Sri Lanka", "br": 97.2, "im": 97.0, "src": 0, "note": ""}, {"c": "St. Lucia", "br": 92.0, "im": 99.0, "src": 0, "note": ""}, {"c": "Sudan", "br": 67.3, "im": 39.0, "src": 0, "note": ""}, {"c": "Suriname", "br": 98.3, "im": 69.0, "src": 0, "note": ""}, {"c": "Syrian Arab Republic", "br": 96.0, "im": 73.0, "src": 0, "note": "Conflict-affected; access and supply are the binding constraints on coverage."}, {"c": "São Tomé and Principe", "br": 98.6, "im": 87.0, "src": 0, "note": ""}, {"c": "Tajikistan", "br": 95.8, "im": 97.0, "src": 0, "note": ""}, {"c": "Tanzania", "br": 26.4, "im": 83.0, "src": 0, "note": ""}, {"c": "Thailand", "br": 99.8, "im": 92.0, "src": 0, "note": ""}, {"c": "Timor-Leste", "br": 60.4, "im": 83.0, "src": 0, "note": ""}, {"c": "Togo", "br": 82.9, "im": 90.0, "src": 0, "note": ""}, {"c": "Tonga", "br": 97.7, "im": 99.0, "src": 0, "note": ""}, {"c": "Tunisia", "br": 99.9, "im": 97.0, "src": 0, "note": ""}, {"c": "Turkmenistan", "br": 99.9, "im": 98.0, "src": 0, "note": ""}, {"c": "Tuvalu", "br": 87.2, "im": 94.0, "src": 0, "note": ""}, {"c": "Türkiye", "br": 98.4, "im": 99.0, "src": 0, "note": ""}, {"c": "Uganda", "br": 32.2, "im": 91.0, "src": 0, "note": ""}, {"c": "Ukraine", "br": 99.8, "im": 88.0, "src": 0, "note": ""}, {"c": "Uzbekistan", "br": 99.9, "im": 90.0, "src": 0, "note": ""}, {"c": "Vanuatu", "br": 43.4, "im": 71.0, "src": 0, "note": ""}, {"c": "Viet Nam", "br": 96.1, "im": 97.0, "src": 0, "note": ""}, {"c": "West Bank and Gaza", "br": 99.2, "im": 88.0, "src": 0, "note": "Conflict-affected; service delivery is the binding constraint."}, {"c": "Yemen, Rep.", "br": 30.7, "im": 42.0, "src": 0, "note": ""}, {"c": "Zambia", "br": 14.0, "im": 91.0, "src": 0, "note": ""}, {"c": "Zimbabwe", "br": 48.7, "im": 91.0, "src": 0, "note": ""}];
 const $ = id => document.getElementById(id);
 const state = {minBR:90, minGap:10, exFlag:true, names:false, ben:550, basis:'coi', cost:80, cohort:null, over:{}, scenario:'floor'};
@@ -831,6 +1233,511 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
 }));
 
 setBasis('coi');
+
+</script>
+<script>
+
+(function () {
+  "use strict";
+
+  const DATA = {"meta":{"wppYear":2023,"nScreened":143,"nMonetisable":35},"countries":[{"name":"China","iso3":"CHN","region":"East Asia & Pacific","income":"Upper middle income","deaths65":8899685.0,"deathsYear":2023,"regRate":61.51,"regMeasure":"Completeness only","regCompletenessOnly":true,"whoYear":null,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":61.51,"ceilPct":61.51,"floorDeaths":5474196.2435,"ceilDeaths":5474196.2435,"pensionLcu":3710.2768,"pensionUsd":550.7184,"currency":"CNY","fxRate":6.7372,"financeYear":2022,"beneficiaries":136440000.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"United States of America","iso3":"USA","region":"North America","income":"High income","deaths65":2230032.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2023,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":2230032.0,"ceilDeaths":2230032.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Japan","iso3":"JPN","region":"East Asia & Pacific","income":"High income","deaths65":1399204.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2020,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":1399204.0,"ceilDeaths":1399204.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Russian Federation","iso3":"RUS","region":"Europe & Central Asia","income":"High income","deaths65":1175450.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":1175450.0,"ceilDeaths":1175450.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Germany","iso3":"DEU","region":"Europe & Central Asia","income":"High income","deaths65":896421.0,"deathsYear":2023,"regRate":98.4837,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":98.4837,"ceilPct":98.4837,"floorDeaths":882828.4647,"ceilDeaths":882828.4647,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Brazil","iso3":"BRA","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":947584.0,"deathsYear":2023,"regRate":98.0892,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":88.6,"pensionCovYear":2022,"pensionModelled":true,"floorPct":86.6892,"ceilPct":88.6,"floorDeaths":821453.2485,"ceilDeaths":839559.424,"pensionLcu":2073.0034,"pensionUsd":401.436,"currency":"BRL","fxRate":5.164,"financeYear":2022,"beneficiaries":30708334.0,"yearAlign":"Aligned","quality":95.0,"partial":true,"missingReason":null},{"name":"Italy","iso3":"ITA","region":"Europe & Central Asia","income":"High income","deaths65":596541.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":596541.0,"ceilDeaths":596541.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"United Kingdom","iso3":"GBR","region":"Europe & Central Asia","income":"High income","deaths65":551279.0,"deathsYear":2023,"regRate":96.5658,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2023,"pensionModelled":true,"floorPct":96.5658,"ceilPct":96.5658,"floorDeaths":532347.2336,"ceilDeaths":532347.2336,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"France","iso3":"FRA","region":"Europe & Central Asia","income":"High income","deaths65":525468.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":525468.0,"ceilDeaths":525468.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Mexico","iso3":"MEX","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":451455.0,"deathsYear":2023,"regRate":97.4829,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":97.4829,"ceilPct":97.4829,"floorDeaths":440091.2514,"ceilDeaths":440091.2514,"pensionLcu":12831.0089,"pensionUsd":637.4912,"currency":"MXN","fxRate":20.1273,"financeYear":2022,"beneficiaries":4458188.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Spain","iso3":"ESP","region":"Europe & Central Asia","income":"High income","deaths65":386793.0,"deathsYear":2023,"regRate":95.1481,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":88.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":84.0481,"ceilPct":88.9,"floorDeaths":325092.0759,"ceilDeaths":343858.977,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Ukraine","iso3":"UKR","region":"Europe & Central Asia","income":"Upper middle income","deaths65":330094.0,"deathsYear":2023,"regRate":98.8309,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":96.2,"pensionCovYear":2020,"pensionModelled":true,"floorPct":95.0309,"ceilPct":96.2,"floorDeaths":313691.3932,"ceilDeaths":317550.428,"pensionLcu":4600.9759,"pensionUsd":142.2588,"currency":"UAH","fxRate":32.3423,"financeYear":2022,"beneficiaries":10687921.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"T\u00fcrkiye","iso3":"TUR","region":"Europe & Central Asia","income":"Upper middle income","deaths65":384291.0,"deathsYear":2023,"regRate":95.3256,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":85.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":81.2256,"ceilPct":85.9,"floorDeaths":312142.5987,"ceilDeaths":330105.969,"pensionLcu":null,"pensionUsd":null,"currency":"TRY","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2021.0, no beneficiary count in th"},{"name":"Republic of Korea","iso3":"KOR","region":"East Asia & Pacific","income":"High income","deaths65":297887.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":297887.0,"ceilDeaths":297887.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Thailand","iso3":"THA","region":"East Asia & Pacific","income":"Upper middle income","deaths65":393772.0,"deathsYear":2023,"regRate":86.7166,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":82.6,"pensionCovYear":2020,"pensionModelled":true,"floorPct":69.3166,"ceilPct":82.6,"floorDeaths":272949.3036,"ceilDeaths":325255.672,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No beneficiary count for the Integrated pillar; Years do not match for the Private sector pillar (expenditure 2022.0, no beneficiary count in the same year); Ye"},{"name":"Poland","iso3":"POL","region":"Europe & Central Asia","income":"High income","deaths65":324825.0,"deathsYear":2023,"regRate":98.0519,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":82.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":80.9519,"ceilPct":82.9,"floorDeaths":262952.145,"ceilDeaths":269279.925,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Canada","iso3":"CAN","region":"North America","income":"High income","deaths65":255667.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":255667.0,"ceilDeaths":255667.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Argentina","iso3":"ARG","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":259693.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":90.8,"pensionCovYear":2021,"pensionModelled":true,"floorPct":90.8,"ceilPct":90.8,"floorDeaths":235801.244,"ceilDeaths":235801.244,"pensionLcu":73883.8247,"pensionUsd":565.6544,"currency":"ARS","fxRate":130.6165,"financeYear":2022,"beneficiaries":5730467.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Iran (Islamic Republic of)","iso3":"IRN","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Upper middle income","deaths65":275683.0,"deathsYear":2023,"regRate":88.6923,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2017,"pensionCov":87.2,"pensionCovYear":2019,"pensionModelled":true,"floorPct":75.8923,"ceilPct":87.2,"floorDeaths":209222.1804,"ceilDeaths":240395.576,"pensionLcu":54142971.2655,"pensionUsd":1289.1184,"currency":"LCU - national currency unit of Wo","fxRate":42000.0,"financeYear":2022,"beneficiaries":4540200.0,"yearAlign":"Severe mismatch","quality":85.0,"partial":false,"missingReason":null},{"name":"Philippines","iso3":"PHL","region":"East Asia & Pacific","income":"Upper middle income","deaths65":337573.0,"deathsYear":2023,"regRate":94.9682,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":65.6,"pensionCovYear":2021,"pensionModelled":true,"floorPct":60.5682,"ceilPct":65.6,"floorDeaths":204461.913,"ceilDeaths":221447.888,"pensionLcu":14482.8666,"pensionUsd":265.849,"currency":"PHP","fxRate":54.4778,"financeYear":2022,"beneficiaries":522784.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Egypt","iso3":"EGY","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Lower middle income","deaths65":343133.0,"deathsYear":2023,"regRate":96.8534,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":58.5,"pensionCovYear":2022,"pensionModelled":true,"floorPct":55.3534,"ceilPct":58.5,"floorDeaths":189935.8726,"ceilDeaths":200732.805,"pensionLcu":2328.0734,"pensionUsd":121.5042,"currency":"LCU - national currency unit of Wo","fxRate":19.1604,"financeYear":2022,"beneficiaries":10920318.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Romania","iso3":"ROU","region":"Europe & Central Asia","income":"High income","deaths65":201616.0,"deathsYear":2023,"regRate":94.9214,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":98.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":93.8214,"ceilPct":94.9214,"floorDeaths":189158.9895,"ceilDeaths":191376.7655,"pensionLcu":null,"pensionUsd":null,"currency":"RON","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2023.0, no beneficiary count in th"},{"name":"Netherlands","iso3":"NLD","region":"Europe & Central Asia","income":"High income","deaths65":144303.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":144303.0,"ceilDeaths":144303.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"South Africa","iso3":"ZAF","region":"Sub-Saharan Africa ","income":"Upper middle income","deaths65":243852.0,"deathsYear":2023,"regRate":83.5148,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2020,"pensionCov":69.5757,"pensionCovYear":2024,"pensionModelled":true,"floorPct":53.0904,"ceilPct":69.5757,"floorDeaths":129462.097,"ceilDeaths":169661.6491,"pensionLcu":19401.1444,"pensionUsd":1178.7484,"currency":"LCU - national currency unit of Wo","fxRate":16.4591,"financeYear":2020,"beneficiaries":476776.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Venezuela (Bolivarian Republic of)","iso3":"VEN","region":"Latin America & Caribbean ","income":"Lower middle income","deaths65":123956.0,"deathsYear":2023,"regRate":94.1971,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2016,"pensionCov":100.0,"pensionCovYear":2019,"pensionModelled":true,"floorPct":94.1971,"ceilPct":94.1971,"floorDeaths":116762.9132,"ceilDeaths":116762.9132,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Australia","iso3":"AUS","region":"East Asia & Pacific","income":"High income","deaths65":155771.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":74.4,"pensionCovYear":2022,"pensionModelled":true,"floorPct":74.4,"ceilPct":74.4,"floorDeaths":115893.624,"ceilDeaths":115893.624,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Greece","iso3":"GRC","region":"Europe & Central Asia","income":"High income","deaths65":112777.0,"deathsYear":2023,"regRate":96.168,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":99.2,"pensionCovYear":2020,"pensionModelled":true,"floorPct":95.368,"ceilPct":96.168,"floorDeaths":107553.1626,"ceilDeaths":108455.3786,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Hungary","iso3":"HUN","region":"Europe & Central Asia","income":"High income","deaths65":103226.0,"deathsYear":2023,"regRate":99.2749,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":99.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":98.2749,"ceilPct":99.0,"floorDeaths":101445.2769,"ceilDeaths":102193.74,"pensionLcu":null,"pensionUsd":null,"currency":"HUF","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2022.0, no beneficiary count in th"},{"name":"Colombia","iso3":"COL","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":181737.0,"deathsYear":2023,"regRate":95.0366,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":59.6094,"pensionCovYear":2025,"pensionModelled":true,"floorPct":54.6461,"ceilPct":59.6094,"floorDeaths":99312.1398,"ceilDeaths":108332.422,"pensionLcu":1958671.0085,"pensionUsd":460.1931,"currency":"COP","fxRate":4256.1942,"financeYear":2022,"beneficiaries":1718708.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Portugal","iso3":"PRT","region":"Europe & Central Asia","income":"High income","deaths65":100105.0,"deathsYear":2023,"regRate":99.5435,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":96.7,"pensionCovYear":2021,"pensionModelled":true,"floorPct":96.2435,"ceilPct":96.7,"floorDeaths":96344.5365,"ceilDeaths":96801.535,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Belgium","iso3":"BEL","region":"Europe & Central Asia","income":"High income","deaths65":97856.0,"deathsYear":2023,"regRate":97.1568,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":97.1568,"ceilPct":97.1568,"floorDeaths":95073.7868,"ceilDeaths":95073.7868,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Uzbekistan","iso3":"UZB","region":"Europe & Central Asia","income":"Lower middle income","deaths65":118432.0,"deathsYear":2023,"regRate":79.4864,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":79.4864,"ceilPct":79.4864,"floorDeaths":94137.3153,"ceilDeaths":94137.3153,"pensionLcu":1040282.4858,"pensionUsd":94.142,"currency":"UZS","fxRate":11050.1454,"financeYear":2022,"beneficiaries":3765592.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Czechia","iso3":"CZE","region":"Europe & Central Asia","income":"High income","deaths65":95772.0,"deathsYear":2023,"regRate":97.2088,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":97.2088,"ceilPct":97.2088,"floorDeaths":93098.7836,"ceilDeaths":93098.7836,"pensionLcu":13952.3596,"pensionUsd":597.3524,"currency":"LCU - national currency unit of Wo","fxRate":23.357,"financeYear":2022,"beneficiaries":3433737.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Belarus","iso3":"BLR","region":"Europe & Central Asia","income":"Upper middle income","deaths65":87081.0,"deathsYear":2023,"regRate":98.56,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2018,"pensionCov":100.0,"pensionCovYear":2020,"pensionModelled":true,"floorPct":98.56,"ceilPct":98.56,"floorDeaths":85827.0485,"ceilDeaths":85827.0485,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Sweden","iso3":"SWE","region":"Europe & Central Asia","income":"High income","deaths65":83951.0,"deathsYear":2023,"regRate":95.4014,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2020,"pensionModelled":true,"floorPct":95.4014,"ceilPct":95.4014,"floorDeaths":80090.4181,"ceilDeaths":80090.4181,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Austria","iso3":"AUT","region":"Europe & Central Asia","income":"High income","deaths65":80606.0,"deathsYear":2023,"regRate":95.2066,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":95.2066,"ceilPct":95.2066,"floorDeaths":76742.2614,"ceilDeaths":76742.2614,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Bulgaria","iso3":"BGR","region":"Europe & Central Asia","income":"High income","deaths65":82252.0,"deathsYear":2023,"regRate":98.0879,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":93.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":91.0879,"ceilPct":93.0,"floorDeaths":74921.6075,"ceilDeaths":76494.36,"pensionLcu":325.0525,"pensionUsd":174.7461,"currency":"LCU - national currency unit of Wo","fxRate":1.8601,"financeYear":2022,"beneficiaries":2049318.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Kazakhstan","iso3":"KAZ","region":"Europe & Central Asia","income":"Upper middle income","deaths65":81229.0,"deathsYear":2023,"regRate":96.3823,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":95.7,"pensionCovYear":2023,"pensionModelled":true,"floorPct":92.0823,"ceilPct":95.7,"floorDeaths":74797.5251,"ceilDeaths":77736.153,"pensionLcu":null,"pensionUsd":null,"currency":"KZT","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme"},{"name":"Chile","iso3":"CHL","region":"Latin America & Caribbean ","income":"High income","deaths65":96134.0,"deathsYear":2023,"regRate":95.5611,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":71.6,"pensionCovYear":2021,"pensionModelled":true,"floorPct":67.1611,"ceilPct":71.6,"floorDeaths":64564.6755,"ceilDeaths":68831.944,"pensionLcu":263171.087,"pensionUsd":301.3475,"currency":"CLP","fxRate":873.3142,"financeYear":2022,"beneficiaries":2188155.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Switzerland","iso3":"CHE","region":"Europe & Central Asia","income":"High income","deaths65":64856.0,"deathsYear":2023,"regRate":97.3343,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":99.3,"pensionCovYear":2021,"pensionModelled":true,"floorPct":96.6343,"ceilPct":97.3343,"floorDeaths":62673.1358,"ceilDeaths":63127.1278,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Finland","iso3":"FIN","region":"Europe & Central Asia","income":"High income","deaths65":52665.0,"deathsYear":2023,"regRate":96.7299,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":96.7299,"ceilPct":96.7299,"floorDeaths":50942.812,"ceilDeaths":50942.812,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Cuba","iso3":"CUB","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":82841.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":60.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":60.9,"ceilPct":60.9,"floorDeaths":50450.169,"ceilDeaths":50450.169,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Denmark","iso3":"DNK","region":"Europe & Central Asia","income":"High income","deaths65":50105.0,"deathsYear":2023,"regRate":99.537,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":99.537,"ceilPct":99.537,"floorDeaths":49873.0207,"ceilDeaths":49873.0207,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Serbia","iso3":"SRB","region":"Europe & Central Asia","income":"Upper middle income","deaths65":76570.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":53.5,"pensionCovYear":2021,"pensionModelled":true,"floorPct":53.5,"ceilPct":53.5,"floorDeaths":40964.95,"ceilDeaths":40964.95,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"Years do not match for the Integrated pillar (expenditure 2022.0, no beneficiary count in the same year)"},{"name":"Croatia","iso3":"HRV","region":"Europe & Central Asia","income":"High income","deaths65":47233.0,"deathsYear":2023,"regRate":93.1781,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":93.2,"pensionCovYear":2022,"pensionModelled":true,"floorPct":86.3781,"ceilPct":93.1781,"floorDeaths":40798.988,"ceilDeaths":44010.832,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Slovakia","iso3":"SVK","region":"Europe & Central Asia","income":"High income","deaths65":42031.0,"deathsYear":2023,"regRate":96.675,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":96.675,"ceilPct":96.675,"floorDeaths":40633.4611,"ceilDeaths":40633.4611,"pensionLcu":404.7114,"pensionUsd":426.1808,"currency":"LCU - national currency unit of Wo","fxRate":0.9496,"financeYear":2022,"beneficiaries":1700784.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Israel","iso3":"ISR","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":41824.0,"deathsYear":2023,"regRate":96.7933,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":96.7933,"ceilPct":96.7933,"floorDeaths":40482.8339,"ceilDeaths":40482.8339,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Norway","iso3":"NOR","region":"Europe & Central Asia","income":"High income","deaths65":39104.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2023,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":39104.0,"ceilDeaths":39104.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Tunisia","iso3":"TUN","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Lower middle income","deaths65":51412.0,"deathsYear":2023,"regRate":70.8952,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":70.8952,"ceilPct":70.8952,"floorDeaths":36448.6343,"ceilDeaths":36448.6343,"pensionLcu":438.0942,"pensionUsd":141.1568,"currency":"LCU - national currency unit of Wo","fxRate":3.1036,"financeYear":2022,"beneficiaries":886226.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"China, Hong Kong SAR","iso3":"HKG","region":"East Asia & Pacific","income":"High income","deaths65":48419.0,"deathsYear":2023,"regRate":91.4227,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":82.5,"pensionCovYear":2023,"pensionModelled":true,"floorPct":73.9227,"ceilPct":82.5,"floorDeaths":35792.6251,"ceilDeaths":39945.675,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Ecuador","iso3":"ECU","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":55986.0,"deathsYear":2023,"regRate":94.837,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":66.1,"pensionCovYear":2021,"pensionModelled":true,"floorPct":60.937,"ceilPct":66.1,"floorDeaths":34116.1935,"ceilDeaths":37006.746,"pensionLcu":707.94,"pensionUsd":707.94,"currency":"USD","fxRate":1.0,"financeYear":2021,"beneficiaries":583813.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Sri Lanka","iso3":"LKA","region":"South Asia","income":"Upper middle income","deaths65":119881.0,"deathsYear":2023,"regRate":96.9253,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":31.1,"pensionCovYear":2021,"pensionModelled":true,"floorPct":28.0253,"ceilPct":31.1,"floorDeaths":33597.0556,"ceilDeaths":37282.991,"pensionLcu":38074.7788,"pensionUsd":118.0128,"currency":"LKR","fxRate":322.6327,"financeYear":2022,"beneficiaries":676430.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Georgia","iso3":"GEO","region":"Europe & Central Asia","income":"Upper middle income","deaths65":33256.0,"deathsYear":2023,"regRate":97.5746,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":97.5746,"ceilPct":97.5746,"floorDeaths":32449.3959,"ceilDeaths":32449.3959,"pensionLcu":null,"pensionUsd":null,"currency":"GEL","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme"},{"name":"Azerbaijan","iso3":"AZE","region":"Europe & Central Asia","income":"Upper middle income","deaths65":42210.0,"deathsYear":2023,"regRate":78.2473,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2007,"pensionCov":97.0,"pensionCovYear":2023,"pensionModelled":true,"floorPct":75.2473,"ceilPct":78.2473,"floorDeaths":31761.8905,"ceilDeaths":33028.1905,"pensionLcu":331.7517,"pensionUsd":195.1481,"currency":"AZN","fxRate":1.7,"financeYear":2022,"beneficiaries":1200475.0,"yearAlign":"Severe mismatch","quality":85.0,"partial":false,"missingReason":null},{"name":"Peru","iso3":"PER","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":113537.0,"deathsYear":2023,"regRate":74.2428,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":53.6537,"pensionCovYear":2024,"pensionModelled":true,"floorPct":27.8966,"ceilPct":53.6537,"floorDeaths":31672.9212,"ceilDeaths":60916.8335,"pensionLcu":758.5028,"pensionUsd":197.7749,"currency":"PEN","fxRate":3.8352,"financeYear":2022,"beneficiaries":842554.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"New Zealand","iso3":"NZL","region":"East Asia & Pacific","income":"High income","deaths65":31036.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2020,"pensionCov":100.0,"pensionCovYear":2023,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":31036.0,"ceilDeaths":31036.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Lithuania","iso3":"LTU","region":"Europe & Central Asia","income":"High income","deaths65":31830.0,"deathsYear":2023,"regRate":93.1528,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":93.1528,"ceilPct":93.1528,"floorDeaths":29650.5245,"ceilDeaths":29650.5245,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"Years do not match for the Integrated pillar (expenditure 2023.0, no beneficiary count in the same year)"},{"name":"Ireland","iso3":"IRL","region":"Europe & Central Asia","income":"High income","deaths65":29529.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":95.8,"pensionCovYear":2022,"pensionModelled":true,"floorPct":95.8,"ceilPct":95.8,"floorDeaths":28288.782,"ceilDeaths":28288.782,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Uruguay","iso3":"URY","region":"Latin America & Caribbean ","income":"High income","deaths65":25795.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":25795.0,"ceilDeaths":25795.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Puerto Rico","iso3":"PRI","region":"Latin America & Caribbean ","income":"High income","deaths65":29295.0,"deathsYear":2023,"regRate":97.9403,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":80.8,"pensionCovYear":2022,"pensionModelled":true,"floorPct":78.7403,"ceilPct":80.8,"floorDeaths":23066.9667,"ceilDeaths":23670.36,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Bosnia and Herzegovina","iso3":"BIH","region":"Europe & Central Asia","income":"Upper middle income","deaths65":35138.0,"deathsYear":2023,"regRate":85.0122,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":75.3,"pensionCovYear":2020,"pensionModelled":true,"floorPct":60.3122,"ceilPct":75.3,"floorDeaths":21192.4843,"ceilDeaths":26458.914,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Republic of Moldova","iso3":"MDA","region":"Europe & Central Asia","income":"Upper middle income","deaths65":28031.0,"deathsYear":2023,"regRate":81.0448,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":94.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":75.0448,"ceilPct":81.0448,"floorDeaths":21035.8112,"ceilDeaths":22717.6712,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Latvia","iso3":"LVA","region":"Europe & Central Asia","income":"High income","deaths65":21835.0,"deathsYear":2023,"regRate":95.9248,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":95.9248,"ceilPct":95.9248,"floorDeaths":20945.1724,"ceilDeaths":20945.1724,"pensionLcu":null,"pensionUsd":null,"currency":"EUR","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2023.0, no beneficiary count in th"},{"name":"Slovenia","iso3":"SVN","region":"Europe & Central Asia","income":"High income","deaths65":18547.0,"deathsYear":2023,"regRate":98.0398,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":98.0398,"ceilPct":98.0398,"floorDeaths":18183.4328,"ceilDeaths":18183.4328,"pensionLcu":890.5268,"pensionUsd":937.768,"currency":"LCU - national currency unit of Wo","fxRate":0.9496,"financeYear":2022,"beneficiaries":628082.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Paraguay","iso3":"PRY","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":21782.0,"deathsYear":2023,"regRate":94.5872,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":82.2,"pensionCovYear":2021,"pensionModelled":true,"floorPct":76.7872,"ceilPct":82.2,"floorDeaths":16725.7964,"ceilDeaths":17904.804,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Kyrgyzstan","iso3":"KGZ","region":"Europe & Central Asia","income":"Lower middle income","deaths65":21973.0,"deathsYear":2023,"regRate":74.6404,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":74.6404,"ceilPct":74.6404,"floorDeaths":16400.7376,"ceilDeaths":16400.7376,"pensionLcu":5908.3225,"pensionUsd":70.24,"currency":"KGS","fxRate":84.1162,"financeYear":2022,"beneficiaries":766000.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Armenia","iso3":"ARM","region":"Europe & Central Asia","income":"Upper middle income","deaths65":20060.0,"deathsYear":2023,"regRate":92.4573,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":81.9,"pensionCovYear":2021,"pensionModelled":true,"floorPct":74.3573,"ceilPct":81.9,"floorDeaths":14916.072,"ceilDeaths":16429.14,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Tajikistan","iso3":"TJK","region":"Europe & Central Asia","income":"Lower middle income","deaths65":20574.0,"deathsYear":2023,"regRate":66.2924,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":100.0,"pensionCovYear":2023,"pensionModelled":true,"floorPct":66.2924,"ceilPct":66.2924,"floorDeaths":13638.993,"ceilDeaths":13638.993,"pensionLcu":null,"pensionUsd":null,"currency":"TJS","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2022.0, no beneficiary count in th"},{"name":"Estonia","iso3":"EST","region":"Europe & Central Asia","income":"High income","deaths65":13871.0,"deathsYear":2023,"regRate":93.8369,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":93.8369,"ceilPct":93.8369,"floorDeaths":13016.1106,"ceilDeaths":13016.1106,"pensionLcu":585.4208,"pensionUsd":616.4766,"currency":"EUR","fxRate":0.9496,"financeYear":2022,"beneficiaries":320478.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Costa Rica","iso3":"CRI","region":"Latin America & Caribbean ","income":"High income","deaths65":19396.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":56.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":56.9,"ceilPct":56.9,"floorDeaths":11036.324,"ceilDeaths":11036.324,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Turkmenistan","iso3":"TKM","region":"Europe & Central Asia","income":"Upper middle income","deaths65":17695.0,"deathsYear":2023,"regRate":84.7334,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2015,"pensionCov":77.2,"pensionCovYear":2021,"pensionModelled":true,"floorPct":61.9334,"ceilPct":77.2,"floorDeaths":10959.1198,"ceilDeaths":13660.54,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Bolivia (Plurinational State of)","iso3":"BOL","region":"Latin America & Caribbean ","income":"Lower middle income","deaths65":40201.0,"deathsYear":2023,"regRate":27.1417,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2003,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":27.1417,"ceilPct":27.1417,"floorDeaths":10911.2491,"ceilDeaths":10911.2491,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"Years do not match for the Integrated pillar (expenditure 2020.0, no beneficiary count in the same year)"},{"name":"North Macedonia","iso3":"MKD","region":"Europe & Central Asia","income":"Upper middle income","deaths65":16082.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":65.8,"pensionCovYear":2021,"pensionModelled":true,"floorPct":65.8,"ceilPct":65.8,"floorDeaths":10581.956,"ceilDeaths":10581.956,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No beneficiary count for the Integrated pillar"},{"name":"Jamaica","iso3":"JAM","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":13213.0,"deathsYear":2023,"regRate":90.7107,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":87.8,"pensionCovYear":2022,"pensionModelled":true,"floorPct":78.5107,"ceilPct":87.8,"floorDeaths":10373.6162,"ceilDeaths":11601.014,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"Years do not match for the Integrated pillar (expenditure 2021.0, no beneficiary count in the same year); Years do not match for the Public sector pillar (expen"},{"name":"Guatemala","iso3":"GTM","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":41173.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":23.3,"pensionCovYear":2022,"pensionModelled":true,"floorPct":23.3,"ceilPct":23.3,"floorDeaths":9593.309,"ceilDeaths":9593.309,"pensionLcu":null,"pensionUsd":null,"currency":"GTQ","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme"},{"name":"Albania","iso3":"ALB","region":"Europe & Central Asia","income":"Upper middle income","deaths65":19043.0,"deathsYear":2023,"regRate":53.2574,"regMeasure":"Completeness only","regCompletenessOnly":true,"whoYear":null,"pensionCov":96.5,"pensionCovYear":2021,"pensionModelled":true,"floorPct":49.7574,"ceilPct":53.2574,"floorDeaths":9475.3074,"ceilDeaths":10141.8124,"pensionLcu":null,"pensionUsd":null,"currency":"ALL","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2022.0, no beneficiary count in th"},{"name":"Panama","iso3":"PAN","region":"Latin America & Caribbean ","income":"High income","deaths65":13241.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":61.5,"pensionCovYear":2022,"pensionModelled":true,"floorPct":61.5,"ceilPct":61.5,"floorDeaths":8143.215,"ceilDeaths":8143.215,"pensionLcu":541.101,"pensionUsd":541.101,"currency":"PAB","fxRate":1.0,"financeYear":2022,"beneficiaries":304787.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Mongolia","iso3":"MNG","region":"East Asia & Pacific","income":"Upper middle income","deaths65":8893.0,"deathsYear":2023,"regRate":87.7653,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":87.7653,"ceilPct":87.7653,"floorDeaths":7804.967,"ceilDeaths":7804.967,"pensionLcu":null,"pensionUsd":null,"currency":"MNT","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2022.0, no beneficiary count in th"},{"name":"Saudi Arabia","iso3":"SAU","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":33913.0,"deathsYear":2023,"regRate":98.0114,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":24.5,"pensionCovYear":2022,"pensionModelled":true,"floorPct":22.5114,"ceilPct":24.5,"floorDeaths":7634.297,"ceilDeaths":8308.685,"pensionLcu":7681.2858,"pensionUsd":2048.3429,"currency":"LCU - national currency unit of Wo","fxRate":3.75,"financeYear":2022,"beneficiaries":649143.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Mauritius","iso3":"MUS","region":"Sub-Saharan Africa ","income":"Upper middle income","deaths65":6979.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":100.0,"ceilPct":100.0,"floorDeaths":6979.0,"ceilDeaths":6979.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Trinidad and Tobago","iso3":"TTO","region":"Latin America & Caribbean ","income":"High income","deaths65":7672.0,"deathsYear":2023,"regRate":94.2237,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2020,"pensionCov":90.8,"pensionCovYear":2022,"pensionModelled":true,"floorPct":85.0237,"ceilPct":90.8,"floorDeaths":6523.0212,"ceilDeaths":6966.176,"pensionLcu":3096.089,"pensionUsd":458.662,"currency":"LCU - national currency unit of Wo","fxRate":6.7503,"financeYear":2023,"beneficiaries":223281.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Singapore","iso3":"SGP","region":"East Asia & Pacific","income":"High income","deaths65":21075.0,"deathsYear":2023,"regRate":90.2823,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":37.3,"pensionCovYear":2021,"pensionModelled":true,"floorPct":27.5823,"ceilPct":37.3,"floorDeaths":5812.9669,"ceilDeaths":7860.975,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Jordan","iso3":"JOR","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Upper middle income","deaths65":19482.0,"deathsYear":2023,"regRate":69.801,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":57.5,"pensionCovYear":2022,"pensionModelled":true,"floorPct":27.301,"ceilPct":57.5,"floorDeaths":5318.7782,"ceilDeaths":11202.15,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Libya","iso3":"LBY","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Upper middle income","deaths65":19932.0,"deathsYear":2023,"regRate":47.1844,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2017,"pensionCov":79.4,"pensionCovYear":2020,"pensionModelled":true,"floorPct":26.5844,"ceilPct":47.1844,"floorDeaths":5298.809,"ceilDeaths":9404.801,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Cyprus","iso3":"CYP","region":"Europe & Central Asia","income":"High income","deaths65":8153.0,"deathsYear":2023,"regRate":71.2737,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":92.7,"pensionCovYear":2022,"pensionModelled":true,"floorPct":63.9737,"ceilPct":71.2737,"floorDeaths":5215.7745,"ceilDeaths":5810.9435,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Botswana","iso3":"BWA","region":"Sub-Saharan Africa ","income":"Upper middle income","deaths65":5570.0,"deathsYear":2023,"regRate":87.2743,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":87.2743,"ceilPct":87.2743,"floorDeaths":4861.1763,"ceilDeaths":4861.1763,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count for the Integrated pillar; Years do not match for the Public sector pillar (expenditure 2023.0, no beneficiary count in the same year)"},{"name":"Iraq","iso3":"IRQ","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Upper middle income","deaths65":84770.0,"deathsYear":2023,"regRate":56.3984,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2016,"pensionCov":48.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":5.2984,"ceilPct":48.9,"floorDeaths":4491.4219,"ceilDeaths":41452.53,"pensionLcu":476917.5282,"pensionUsd":328.9086,"currency":"IQD","fxRate":1450.0,"financeYear":2022,"beneficiaries":1395300.0,"yearAlign":"Severe mismatch","quality":85.0,"partial":false,"missingReason":null},{"name":"Fiji","iso3":"FJI","region":"East Asia & Pacific","income":"Upper middle income","deaths65":4395.0,"deathsYear":2023,"regRate":93.0736,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":93.0736,"ceilPct":93.0736,"floorDeaths":4090.5844,"ceilDeaths":4090.5844,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Luxembourg","iso3":"LUX","region":"Europe & Central Asia","income":"High income","deaths65":3756.0,"deathsYear":2023,"regRate":83.7805,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":83.7805,"ceilPct":83.7805,"floorDeaths":3146.796,"ceilDeaths":3146.796,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Nicaragua","iso3":"NIC","region":"Latin America & Caribbean ","income":"Lower middle income","deaths65":16564.0,"deathsYear":2023,"regRate":83.9573,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":35.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":18.9573,"ceilPct":35.0,"floorDeaths":3140.0878,"ceilDeaths":5797.4,"pensionLcu":6880.2274,"pensionUsd":195.6221,"currency":"LCU - national currency unit of Wo","fxRate":35.171,"financeYear":2021,"beneficiaries":257874.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Montenegro","iso3":"MNE","region":"Europe & Central Asia","income":"Upper middle income","deaths65":5795.0,"deathsYear":2023,"regRate":73.6238,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":78.0,"pensionCovYear":2020,"pensionModelled":true,"floorPct":51.6238,"ceilPct":73.6238,"floorDeaths":2991.6004,"ceilDeaths":4266.5004,"pensionLcu":376.1252,"pensionUsd":395.5401,"currency":"EUR","fxRate":0.9509,"financeYear":2022,"beneficiaries":110028.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Malta","iso3":"MLT","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":3387.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":82.9,"pensionCovYear":2021,"pensionModelled":true,"floorPct":82.9,"ceilPct":82.9,"floorDeaths":2807.823,"ceilDeaths":2807.823,"pensionLcu":796.3179,"pensionUsd":941.8373,"currency":"LCU - national currency unit of Wo","fxRate":0.8455,"financeYear":2021,"beneficiaries":99702.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Guyana","iso3":"GUY","region":"Latin America & Caribbean ","income":"High income","deaths65":2847.0,"deathsYear":2023,"regRate":85.0744,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2020,"pensionCov":100.0,"pensionCovYear":2020,"pensionModelled":true,"floorPct":85.0744,"ceilPct":85.0744,"floorDeaths":2422.0684,"ceilDeaths":2422.0684,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Guadeloupe","iso3":"GLP","region":null,"income":null,"deaths65":2863.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":82.3,"pensionCovYear":2021,"pensionModelled":true,"floorPct":82.3,"ceilPct":82.3,"floorDeaths":2356.249,"ceilDeaths":2356.249,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Barbados","iso3":"BRB","region":"Latin America & Caribbean ","income":"High income","deaths65":2320.0,"deathsYear":2023,"regRate":96.9614,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2013,"pensionCov":98.4,"pensionCovYear":2020,"pensionModelled":true,"floorPct":95.3614,"ceilPct":96.9614,"floorDeaths":2212.3853,"ceilDeaths":2249.5053,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Martinique","iso3":"MTQ","region":null,"income":null,"deaths65":2935.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":72.1,"pensionCovYear":2021,"pensionModelled":true,"floorPct":72.1,"ceilPct":72.1,"floorDeaths":2116.135,"ceilDeaths":2116.135,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Oman","iso3":"OMN","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":5168.0,"deathsYear":2023,"regRate":92.6781,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":46.6,"pensionCovYear":2022,"pensionModelled":true,"floorPct":39.2781,"ceilPct":46.6,"floorDeaths":2029.8909,"ceilDeaths":2408.288,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Iceland","iso3":"ISL","region":"Europe & Central Asia","income":"High income","deaths65":2144.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":82.4,"pensionCovYear":2021,"pensionModelled":true,"floorPct":82.4,"ceilPct":82.4,"floorDeaths":1766.656,"ceilDeaths":1766.656,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Suriname","iso3":"SUR","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":2229.0,"deathsYear":2023,"regRate":75.9952,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2014,"pensionCov":100.0,"pensionCovYear":2020,"pensionModelled":true,"floorPct":75.9952,"ceilPct":75.9952,"floorDeaths":1693.9324,"ceilDeaths":1693.9324,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"El Salvador","iso3":"SLV","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":27058.0,"deathsYear":2023,"regRate":81.007,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2018,"pensionCov":24.5,"pensionCovYear":2021,"pensionModelled":true,"floorPct":5.507,"ceilPct":24.5,"floorDeaths":1490.0971,"ceilDeaths":6629.21,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Cabo Verde","iso3":"CPV","region":"Sub-Saharan Africa ","income":"Upper middle income","deaths65":1681.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2012,"pensionCov":76.7,"pensionCovYear":2023,"pensionModelled":true,"floorPct":76.7,"ceilPct":76.7,"floorDeaths":1289.327,"ceilDeaths":1289.327,"pensionLcu":25671.8393,"pensionUsd":244.813,"currency":"LCU - national currency unit of Wo","fxRate":104.8631,"financeYear":2022,"beneficiaries":9473.0,"yearAlign":"Severe mismatch","quality":85.0,"partial":false,"missingReason":null},{"name":"Brunei Darussalam","iso3":"BRN","region":"East Asia & Pacific","income":"High income","deaths65":1326.0,"deathsYear":2023,"regRate":84.6559,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":84.6559,"ceilPct":84.6559,"floorDeaths":1122.5368,"ceilDeaths":1122.5368,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Bahamas","iso3":"BHS","region":"Latin America & Caribbean ","income":"High income","deaths65":2187.0,"deathsYear":2023,"regRate":73.9201,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2016,"pensionCov":74.8,"pensionCovYear":2019,"pensionModelled":true,"floorPct":48.7201,"ceilPct":73.9201,"floorDeaths":1065.5087,"ceilDeaths":1616.6327,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Maldives","iso3":"MDV","region":"South Asia","income":"Upper middle income","deaths65":875.0,"deathsYear":2023,"regRate":94.3231,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":94.3231,"ceilPct":94.3231,"floorDeaths":825.3275,"ceilDeaths":825.3275,"pensionLcu":3916.3412,"pensionUsd":254.5289,"currency":"MVR","fxRate":15.3866,"financeYear":2022,"beneficiaries":7189.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Bahrain","iso3":"BHR","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":1763.0,"deathsYear":2023,"regRate":99.2999,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2014,"pensionCov":46.5,"pensionCovYear":2022,"pensionModelled":true,"floorPct":45.7999,"ceilPct":46.5,"floorDeaths":807.4527,"ceilDeaths":819.795,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"United Arab Emirates","iso3":"ARE","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":4065.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":19.7,"pensionCovYear":2022,"pensionModelled":true,"floorPct":19.7,"ceilPct":19.7,"floorDeaths":800.805,"ceilDeaths":800.805,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Aruba","iso3":"ABW","region":"Latin America & Caribbean ","income":"High income","deaths65":791.0,"deathsYear":2023,"regRate":88.7017,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":88.7017,"ceilPct":88.7017,"floorDeaths":701.6303,"ceilDeaths":701.6303,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"United States Virgin Islands","iso3":"VIR","region":"Latin America & Caribbean ","income":"High income","deaths65":1079.0,"deathsYear":2023,"regRate":54.5247,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":95.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":49.5247,"ceilPct":54.5247,"floorDeaths":534.3717,"ceilDeaths":588.3217,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Seychelles","iso3":"SYC","region":"Sub-Saharan Africa ","income":"High income","deaths65":646.0,"deathsYear":2023,"regRate":81.9309,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":100.0,"pensionCovYear":2023,"pensionModelled":true,"floorPct":81.9309,"ceilPct":81.9309,"floorDeaths":529.2737,"ceilDeaths":529.2737,"pensionLcu":null,"pensionUsd":null,"currency":"SCR","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; Years do not match for the Integrated pillar (expenditure 2022.0, no beneficiary count in th"},{"name":"Dominica","iso3":"DMA","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":621.0,"deathsYear":2023,"regRate":90.8772,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":92.7,"pensionCovYear":2020,"pensionModelled":true,"floorPct":83.5772,"ceilPct":90.8772,"floorDeaths":519.0144,"ceilDeaths":564.3474,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Bermuda","iso3":"BMU","region":"North America","income":"High income","deaths65":472.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":92.8,"pensionCovYear":2021,"pensionModelled":true,"floorPct":92.8,"ceilPct":92.8,"floorDeaths":438.016,"ceilDeaths":438.016,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"French Guiana","iso3":"GUF","region":null,"income":null,"deaths65":1010.0,"deathsYear":2023,"regRate":83.2187,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":55.5,"pensionCovYear":2022,"pensionModelled":true,"floorPct":38.7187,"ceilPct":55.5,"floorDeaths":391.0589,"ceilDeaths":560.55,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Belize","iso3":"BLZ","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":1037.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":37.5,"pensionCovYear":2021,"pensionModelled":true,"floorPct":37.5,"ceilPct":37.5,"floorDeaths":388.875,"ceilDeaths":388.875,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Grenada","iso3":"GRD","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":707.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":53.5,"pensionCovYear":2020,"pensionModelled":true,"floorPct":53.5,"ceilPct":53.5,"floorDeaths":378.245,"ceilDeaths":378.245,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"Years do not match for the Integrated pillar (expenditure 2023.0, no beneficiary count in the same year)"},{"name":"Antigua and Barbuda","iso3":"ATG","region":"Latin America & Caribbean ","income":"High income","deaths65":420.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":84.4,"pensionCovYear":2020,"pensionModelled":true,"floorPct":84.4,"ceilPct":84.4,"floorDeaths":354.48,"ceilDeaths":354.48,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Kuwait","iso3":"KWT","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":4389.0,"deathsYear":2023,"regRate":82.2018,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":25.4,"pensionCovYear":2022,"pensionModelled":true,"floorPct":7.6018,"ceilPct":25.4,"floorDeaths":333.6427,"ceilDeaths":1114.806,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Saint Vincent and the Grenadines","iso3":"VCT","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":766.0,"deathsYear":2023,"regRate":89.1638,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":51.8,"pensionCovYear":2019,"pensionModelled":true,"floorPct":40.9638,"ceilPct":51.8,"floorDeaths":313.7829,"ceilDeaths":396.788,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Saint Lucia","iso3":"LCA","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":966.0,"deathsYear":2023,"regRate":83.4754,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2020,"pensionCov":48.4,"pensionCovYear":2020,"pensionModelled":true,"floorPct":31.8754,"ceilPct":48.4,"floorDeaths":307.9165,"ceilDeaths":467.544,"pensionLcu":null,"pensionUsd":null,"currency":"XCD","fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No beneficiary count is published for the social pension programme; No beneficiary count for the Integrated pillar; Years do not match for the Private sector pi"},{"name":"Micronesia (Fed. States of)","iso3":"FSM","region":"East Asia & Pacific","income":"Upper middle income","deaths65":381.0,"deathsYear":2023,"regRate":75.2358,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":97.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":72.2358,"ceilPct":75.2358,"floorDeaths":275.2186,"ceilDeaths":286.6486,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Andorra","iso3":"AND","region":"Europe & Central Asia","income":"High income","deaths65":415.0,"deathsYear":2023,"regRate":65.5712,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2020,"pensionCov":100.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":65.5712,"ceilPct":65.5712,"floorDeaths":272.1205,"ceilDeaths":272.1205,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Kiribati","iso3":"KIR","region":"East Asia & Pacific","income":"Lower middle income","deaths65":347.0,"deathsYear":2023,"regRate":79.9682,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2001,"pensionCov":93.8,"pensionCovYear":2020,"pensionModelled":true,"floorPct":73.7682,"ceilPct":79.9682,"floorDeaths":255.9757,"ceilDeaths":277.4897,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"San Marino","iso3":"SMR","region":"Europe & Central Asia","income":"High income","deaths65":241.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":94.6,"pensionCovYear":2023,"pensionModelled":true,"floorPct":94.6,"ceilPct":94.6,"floorDeaths":227.986,"ceilDeaths":227.986,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Saint Kitts and Nevis","iso3":"KNA","region":"Latin America & Caribbean ","income":"High income","deaths65":296.0,"deathsYear":2023,"regRate":82.3529,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":84.7,"pensionCovYear":2020,"pensionModelled":true,"floorPct":67.0529,"ceilPct":82.3529,"floorDeaths":198.4767,"ceilDeaths":243.7647,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Monaco","iso3":"MCO","region":"Europe & Central Asia","income":"High income","deaths65":793.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Completeness only","regCompletenessOnly":true,"whoYear":null,"pensionCov":24.2,"pensionCovYear":2022,"pensionModelled":true,"floorPct":24.2,"ceilPct":24.2,"floorDeaths":191.906,"ceilDeaths":191.906,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Palau","iso3":"PLW","region":"East Asia & Pacific","income":"High income","deaths65":116.0,"deathsYear":2023,"regRate":95.0,"regMeasure":"Completeness only","regCompletenessOnly":true,"whoYear":null,"pensionCov":100.0,"pensionCovYear":2019,"pensionModelled":true,"floorPct":95.0,"ceilPct":95.0,"floorDeaths":110.2,"ceilDeaths":110.2,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Cook Islands","iso3":"COK","region":null,"income":null,"deaths65":92.0,"deathsYear":2023,"regRate":100.0,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":67.2,"pensionCovYear":2022,"pensionModelled":true,"floorPct":67.2,"ceilPct":67.2,"floorDeaths":61.824,"ceilDeaths":61.824,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"British Virgin Islands","iso3":"VGB","region":"Latin America & Caribbean ","income":"High income","deaths65":162.0,"deathsYear":2023,"regRate":74.9035,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":59.3,"pensionCovYear":2022,"pensionModelled":true,"floorPct":34.2035,"ceilPct":59.3,"floorDeaths":55.4096,"ceilDeaths":96.066,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Saint Pierre and Miquelon","iso3":"SPM","region":null,"income":null,"deaths65":65.0,"deathsYear":2023,"regRate":63.9344,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2010,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":63.9344,"ceilPct":63.9344,"floorDeaths":41.5574,"ceilDeaths":41.5574,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Anguilla","iso3":"AIA","region":null,"income":null,"deaths65":74.0,"deathsYear":2023,"regRate":85.7143,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":66.1,"pensionCovYear":2020,"pensionModelled":true,"floorPct":51.8143,"ceilPct":66.1,"floorDeaths":38.3426,"ceilDeaths":48.914,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Montserrat","iso3":"MSR","region":null,"income":null,"deaths65":51.0,"deathsYear":2023,"regRate":70.1754,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":100.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":70.1754,"ceilPct":70.1754,"floorDeaths":35.7895,"ceilDeaths":35.7895,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Cayman Islands","iso3":"CYM","region":"Latin America & Caribbean ","income":"High income","deaths65":185.0,"deathsYear":2023,"regRate":80.7453,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2019,"pensionCov":3.1,"pensionCovYear":2021,"pensionModelled":true,"floorPct":0.0,"ceilPct":3.1,"floorDeaths":0.0,"ceilDeaths":5.735,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Dominican Republic","iso3":"DOM","region":"Latin America & Caribbean ","income":"Upper middle income","deaths65":39271.0,"deathsYear":2023,"regRate":83.4875,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2022,"pensionCov":7.6,"pensionCovYear":2021,"pensionModelled":true,"floorPct":0.0,"ceilPct":7.6,"floorDeaths":0.0,"ceilDeaths":2984.596,"pensionLcu":311099.9013,"pensionUsd":5436.8023,"currency":"LCU - national currency unit of Wo","fxRate":57.2211,"financeYear":2021,"beneficiaries":25735.0,"yearAlign":"Aligned","quality":95.0,"partial":false,"missingReason":null},{"name":"Honduras","iso3":"HND","region":"Latin America & Caribbean ","income":"Lower middle income","deaths65":23126.0,"deathsYear":2023,"regRate":15.9981,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2013,"pensionCov":14.6,"pensionCovYear":2022,"pensionModelled":true,"floorPct":0.0,"ceilPct":14.6,"floorDeaths":0.0,"ceilDeaths":3376.396,"pensionLcu":17042.1125,"pensionUsd":695.9977,"currency":"LCU - national currency unit of Wo","fxRate":24.4859,"financeYear":2022,"beneficiaries":58536.0,"yearAlign":"Severe mismatch","quality":85.0,"partial":false,"missingReason":null},{"name":"Haiti","iso3":"HTI","region":"Latin America & Caribbean ","income":"Lower middle income","deaths65":35504.0,"deathsYear":2023,"regRate":2.5644,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2004,"pensionCov":1.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":0.0,"ceilPct":1.0,"floorDeaths":0.0,"ceilDeaths":355.04,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"India","iso3":"IND","region":"South Asia","income":"Lower middle income","deaths65":5179476.0,"deathsYear":2023,"regRate":10.0,"regMeasure":"Completeness only","regCompletenessOnly":true,"whoYear":null,"pensionCov":45.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":0.0,"ceilPct":10.0,"floorDeaths":0.0,"ceilDeaths":517947.6,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Lebanon","iso3":"LBN","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Lower middle income","deaths65":25246.0,"deathsYear":2023,"regRate":58.709,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":10.0,"pensionCovYear":2018,"pensionModelled":true,"floorPct":0.0,"ceilPct":10.0,"floorDeaths":0.0,"ceilDeaths":2524.6,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":true,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Morocco","iso3":"MAR","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Lower middle income","deaths65":136016.0,"deathsYear":2023,"regRate":35.9504,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":25.5,"pensionCovYear":2021,"pensionModelled":true,"floorPct":0.0,"ceilPct":25.5,"floorDeaths":0.0,"ceilDeaths":34684.08,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No ASPIRE pension expenditure or beneficiary record for this country"},{"name":"Malaysia","iso3":"MYS","region":"East Asia & Pacific","income":"Upper middle income","deaths65":107140.0,"deathsYear":2023,"regRate":63.9901,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2020,"pensionCov":18.5,"pensionCovYear":2023,"pensionModelled":true,"floorPct":0.0,"ceilPct":18.5,"floorDeaths":0.0,"ceilDeaths":19820.9,"pensionLcu":24049.2277,"pensionUsd":5464.3968,"currency":"LCU - national currency unit of Wo","fxRate":4.4011,"financeYear":2022,"beneficiaries":434827.0,"yearAlign":"Moderate mismatch","quality":90.0,"partial":false,"missingReason":null},{"name":"Papua New Guinea","iso3":"PNG","region":"East Asia & Pacific","income":"Lower middle income","deaths65":22714.0,"deathsYear":2023,"regRate":9.2541,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2023,"pensionCov":1.9,"pensionCovYear":2022,"pensionModelled":true,"floorPct":0.0,"ceilPct":1.9,"floorDeaths":0.0,"ceilDeaths":431.566,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Qatar","iso3":"QAT","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"High income","deaths65":1093.0,"deathsYear":2023,"regRate":79.8689,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2024,"pensionCov":8.0,"pensionCovYear":2022,"pensionModelled":true,"floorPct":0.0,"ceilPct":8.0,"floorDeaths":0.0,"ceilDeaths":87.44,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Aligned","quality":80.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Solomon Islands","iso3":"SLB","region":"East Asia & Pacific","income":"Lower middle income","deaths65":1967.0,"deathsYear":2023,"regRate":14.4442,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2018,"pensionCov":0.0,"pensionCovYear":2021,"pensionModelled":true,"floorPct":0.0,"ceilPct":0.0,"floorDeaths":0.0,"ceilDeaths":0.0,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Syrian Arab Republic","iso3":"SYR","region":"Middle East, North Africa, Afghanistan & Pakistan","income":"Low income","deaths65":59899.0,"deathsYear":2023,"regRate":77.9557,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2010,"pensionCov":16.7,"pensionCovYear":2006,"pensionModelled":true,"floorPct":0.0,"ceilPct":16.7,"floorDeaths":0.0,"ceilDeaths":10003.133,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Severe mismatch","quality":70.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"},{"name":"Turks and Caicos Islands","iso3":"TCA","region":"Latin America & Caribbean ","income":"High income","deaths65":242.0,"deathsYear":2023,"regRate":34.9711,"regMeasure":"Derived coverage ratio","regCompletenessOnly":false,"whoYear":2021,"pensionCov":35.5,"pensionCovYear":2019,"pensionModelled":true,"floorPct":0.0,"ceilPct":34.9711,"floorDeaths":0.0,"ceilDeaths":84.6301,"pensionLcu":null,"pensionUsd":null,"currency":null,"fxRate":null,"financeYear":null,"beneficiaries":null,"yearAlign":"Moderate mismatch","quality":75.0,"partial":false,"missingReason":"No World Bank ASPIRE pension expenditure or beneficiary record exists for this country"}]};
+  const C = DATA.countries;
+
+  const SCEN = {
+    cons: { timely: 60, match: 70, delay: 2, stop: 50, ghost: 0.1 },
+    cent: { timely: 80, match: 85, delay: 4, stop: 70, ghost: 0.5 },
+    opt:  { timely: 95, match: 95, delay: 9, stop: 90, ghost: 1.5 }
+  };
+
+  const S = {
+    scen: "cent", bound: "floor", cur: "usd",
+    minDeaths: 0, minCov: 0, minReg: 0,
+    exclCompleteness: false, exclPartial: false, includeStock: true,
+    overrides: {}
+  };
+  Object.assign(S, SCEN.cent);
+
+  const SHORT = {
+    "United States of America": "United States", "Iran (Islamic Republic of)": "Iran",
+    "Russian Federation": "Russia", "Democratic Republic of the Congo": "DR Congo",
+    "Venezuela (Bolivarian Republic of)": "Venezuela", "Bolivia (Plurinational State of)": "Bolivia",
+    "United Republic of Tanzania": "Tanzania", "Republic of Korea": "South Korea",
+    "Dem. People's Republic of Korea": "North Korea", "Micronesia (Fed. States of)": "Micronesia",
+    "China, Hong Kong SAR": "Hong Kong SAR", "Syrian Arab Republic": "Syria",
+    "Republic of Moldova": "Moldova", "Lao People's Democratic Republic": "Laos",
+    "United Kingdom of Great Britain and Northern Ireland": "United Kingdom"
+  };
+  const shortName = n => SHORT[n] || n;
+
+  const $ = id => document.getElementById("dr-" + id);
+  const fmtInt = n => (n == null || isNaN(n)) ? "—" : Math.round(n).toLocaleString("en-GB");
+  const fmtPct = n => (n == null || isNaN(n)) ? "—" : n.toFixed(1) + "%";
+  function fmtUsd(n) {
+    if (n == null || isNaN(n)) return "—";
+    const a = Math.abs(n);
+    if (a >= 1e9) return "$" + (n / 1e9).toFixed(a >= 1e10 ? 0 : 1) + "bn";
+    if (a >= 1e6) return "$" + (n / 1e6).toFixed(a >= 1e7 ? 0 : 1) + "m";
+    if (a >= 1e3) return "$" + Math.round(n / 1e3) + "k";
+    return "$" + Math.round(n);
+  }
+  const median = a => {
+    if (!a.length) return null;
+    const s = a.slice().sort((x, y) => x - y), m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  };
+
+  /* ---------- model ---------- */
+  const pensionUsd = c => S.overrides[c.iso3] != null ? S.overrides[c.iso3] : c.pensionUsd;
+
+  function compute(c, bound) {
+    const b = bound || S.bound;
+    const overlap = b === "floor" ? c.floorPct : c.ceilPct;
+    const linkable = c.deaths65 * overlap / 100;
+    const matchable = linkable * (S.timely / 100) * (S.match / 100);
+    const p = pensionUsd(c);
+    let flow = null, ghosts = null, stock = null;
+    if (p != null) {
+      flow = matchable * p * S.delay * (S.stop / 100);
+      if (c.beneficiaries != null) {
+        ghosts = c.beneficiaries * (S.ghost / 100);
+        stock = ghosts * p * 12 * (S.stop / 100);
+      }
+    }
+    const total = flow == null ? null : flow + (S.includeStock && stock != null ? stock : 0);
+    return { overlap, linkable, matchable, pension: p, flow, ghosts, stock, total };
+  }
+
+  function qualifies(c) {
+    if (c.deaths65 == null || c.deaths65 < S.minDeaths) return false;
+    if (c.pensionCov == null || c.pensionCov < S.minCov) return false;
+    if (c.regRate == null || c.regRate < S.minReg) return false;
+    if (S.exclCompleteness && c.regCompletenessOnly) return false;
+    if (S.exclPartial && c.partial) return false;
+    return true;
+  }
+  const selected = () => C.filter(qualifies);
+
+  /* ---------- panel 1 ---------- */
+  function renderPanel1() {
+    const rows = selected();
+    $("kN").textContent = rows.length;
+    $("kMed").textContent = rows.length ? median(rows.map(c => c.floorPct)).toFixed(1) : "0";
+    $("kCeil").textContent = rows.length ? median(rows.map(c => c.ceilPct)).toFixed(1) : "0";
+    $("kFlag").textContent = C.filter(c => c.regCompletenessOnly || c.partial).length;
+
+    const spreads = rows.filter(c => c.floorPct > 0).map(c => c.ceilPct / c.floorPct);
+    $("spreadMed").textContent = spreads.length ? median(spreads).toFixed(2) + "×" : "—";
+
+    const maxFloor = Math.max.apply(null, rows.map(c => c.floorPct).concat([1]));
+    const body = rows.map(c => {
+      const flag = c.regCompletenessOnly
+        ? '<span class="flag" title="Registration measured by cause-of-death completeness, not civil registration">completeness</span>' : "";
+      const barW = c.ceilPct / maxFloor * 100, fillW = c.floorPct / maxFloor * 100;
+      return "<tr>" +
+        '<td class="l name">' + shortName(c.name) + flag + "</td>" +
+        "<td>" + fmtInt(c.deaths65) + "</td>" +
+        "<td>" + fmtPct(c.regRate) + "</td>" +
+        "<td>" + fmtPct(c.pensionCov) + "</td>" +
+        "<td>" + fmtPct(c.ceilPct) + "</td>" +
+        '<td class="floorcell">' + fmtPct(c.floorPct) + "</td>" +
+        '<td class="l"><span class="bar"><u style="width:' + Math.min(100, barW).toFixed(1) +
+          '%"></u><i style="width:' + Math.min(100, fillW).toFixed(1) + '%"></i></span>' +
+          fmtInt(c.deaths65 * c.floorPct / 100) + " deaths</td>" +
+        "</tr>";
+    }).join("");
+    $("tbl1").querySelector("tbody").innerHTML = body;
+    $("empty1").hidden = rows.length > 0;
+    $("tbl1").parentElement.hidden = rows.length === 0;
+    renderPlot(rows);
+  }
+
+  /* ---------- plot ---------- */
+  const PAD = { l: 52, r: 108, t: 16, b: 44 };
+  function renderPlot(rows) {
+    const W = 680, H = 470;
+    const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
+    const pts = rows.filter(c => c.regRate != null && c.pensionCov != null && c.deaths65 != null);
+    const maxD = Math.max.apply(null, pts.map(c => c.deaths65).concat([1]));
+    const x = v => PAD.l + (v / 100) * iw;
+    const y = v => PAD.t + ih - (v / 100) * ih;
+    const r = d => 3 + 19 * Math.sqrt(d / maxD);
+
+    let s = "";
+    for (let t = 0; t <= 100; t += 20) {
+      s += '<line class="gridline" x1="' + PAD.l + '" y1="' + y(t) + '" x2="' + (PAD.l + iw) + '" y2="' + y(t) + '"/>';
+      s += '<line class="gridline" x1="' + x(t) + '" y1="' + PAD.t + '" x2="' + x(t) + '" y2="' + (PAD.t + ih) + '"/>';
+      s += '<text class="tick" x="' + (PAD.l - 8) + '" y="' + (y(t) + 3) + '" text-anchor="end">' + t + '</text>';
+      s += '<text class="tick" x="' + x(t) + '" y="' + (PAD.t + ih + 15) + '" text-anchor="middle">' + t + '</text>';
+    }
+    s += '<line class="axisline" x1="' + PAD.l + '" y1="' + (PAD.t + ih) + '" x2="' + (PAD.l + iw) + '" y2="' + (PAD.t + ih) + '"/>';
+    s += '<line class="axisline" x1="' + PAD.l + '" y1="' + PAD.t + '" x2="' + PAD.l + '" y2="' + (PAD.t + ih) + '"/>';
+    s += '<text class="axlabel" x="' + (PAD.l + iw / 2) + '" y="' + (H - 8) + '" text-anchor="middle">Death-registration rate (%)</text>';
+    s += '<text class="axlabel" transform="rotate(-90 13 ' + (PAD.t + ih / 2) + ')" x="13" y="' + (PAD.t + ih / 2) + '" text-anchor="middle">Pension coverage (%)</text>';
+
+    // The top-right corner is where the dots cluster, so the annotation goes in
+    // the empty lower-left instead of fighting the data for the space.
+    s += '<text class="ozone" x="' + (PAD.l + 10) + '" y="' + (PAD.t + ih - 30) + '">NEITHER SYSTEM REACHES</text>';
+    s += '<text class="ozonesub" x="' + (PAD.l + 10) + '" y="' + (PAD.t + ih - 18) + '">no guaranteed overlap to review</text>';
+
+    const sorted = pts.slice().sort((a, b) => b.deaths65 - a.deaths65);
+    sorted.forEach(c => {
+      const hasMoney = pensionUsd(c) != null;
+      const fill = c.regCompletenessOnly ? "none" : (hasMoney ? "var(--orange)" : "var(--navy)");
+      const op = c.regCompletenessOnly ? 1 : (hasMoney ? 0.68 : 0.25);
+      const stroke = c.regCompletenessOnly
+        ? ' stroke="var(--caution)" stroke-width="1.5" stroke-dasharray="3 2"' : "";
+      s += '<circle class="dot" data-iso="' + c.iso3 + '" cx="' + x(c.regRate).toFixed(1) +
+           '" cy="' + y(c.pensionCov).toFixed(1) + '" r="' + r(c.deaths65).toFixed(1) +
+           '" fill="' + fill + '" opacity="' + op + '"' + stroke + "/>";
+    });
+
+    // Labels: largest first, above the mark by preference, below when the top
+    // edge is in the way, and never where one is already sitting.
+    const placed = [];
+    sorted.slice(0, 16).forEach(c => {
+      if (placed.length >= 7) return;
+      const nm = shortName(c.name), rr = r(c.deaths65), halfW = nm.length * 2.6;
+      let cx = Math.max(PAD.l + halfW + 2, Math.min(PAD.l + iw - halfW - 2, x(c.regRate)));
+      const cy = [y(c.pensionCov) - rr - 5, y(c.pensionCov) + rr + 10].find(v =>
+        v > PAD.t + 10 && v < PAD.t + ih - 40 &&
+        !placed.some(p => Math.abs(p.x - cx) < (p.w + halfW) && Math.abs(p.y - v) < 12));
+      if (cy === undefined) return;
+      placed.push({ x: cx, y: cy, w: halfW });
+      s += '<text class="dotname" x="' + cx.toFixed(1) + '" y="' + cy.toFixed(1) + '" text-anchor="middle">' + nm + "</text>";
+    });
+
+    // Transparent hit targets last so they sit above every mark.
+    sorted.forEach(c => {
+      s += '<circle class="hit" data-iso="' + c.iso3 + '" cx="' + x(c.regRate).toFixed(1) +
+           '" cy="' + y(c.pensionCov).toFixed(1) + '" r="' + Math.max(7, r(c.deaths65)).toFixed(1) + '"/>';
+    });
+
+    const svg = $("plot");
+    svg.innerHTML = s;
+    svg.querySelectorAll(".hit").forEach(node => {
+      node.addEventListener("mouseenter", e => showTip(e, node.dataset.iso));
+      node.addEventListener("mousemove", e => showTip(e, node.dataset.iso));
+      node.addEventListener("mouseleave", hideTip);
+    });
+  }
+
+  function showTip(e, iso) {
+    const c = C.find(k => k.iso3 === iso);
+    if (!c) return;
+    const m = compute(c);
+    const badge = c.regCompletenessOnly
+      ? '<span class="badge aside">Completeness only</span>'
+      : (m.pension != null ? '<span class="badge sel">Fully valued</span>' : '<span class="badge bg">No pension amount</span>');
+    const row = (k, v) => '<div class="row"><span>' + k + "</span><span>" + v + "</span></div>";
+    let html = '<div class="tc">' + shortName(c.name) + "</div>" + badge +
+      row("Deaths 65+", fmtInt(c.deaths65)) +
+      row("Registration", fmtPct(c.regRate)) +
+      row("Pension coverage", fmtPct(c.pensionCov)) +
+      row("Overlap floor", fmtPct(c.floorPct)) +
+      row("Overlap ceiling", fmtPct(c.ceilPct));
+    html += '<div class="lead">Deaths a linkage would review: <b>' + fmtInt(m.linkable) + "</b></div>";
+    if (m.pension != null) {
+      html += '<div class="lead">Year-one exposure: <b>' + fmtUsd(m.total) + "</b></div>";
+    } else {
+      html += '<div class="anote">' + (c.missingReason || "No pension amount derivable.") + "</div>";
+    }
+    if (c.regCompletenessOnly) {
+      html += '<div class="anote">Registration measured by cause-of-death completeness. Read the rate as a floor on the true one.</div>';
+    }
+    const tip = $("tip");
+    tip.innerHTML = html;
+    tip.classList.add("show");
+    const wrap = tip.parentElement.getBoundingClientRect();
+    const tb = tip.getBoundingClientRect();
+    let left = e.clientX - wrap.left + 14, top = e.clientY - wrap.top + 14;
+    if (left + tb.width > wrap.width - 4) left = e.clientX - wrap.left - tb.width - 14;
+    if (top + tb.height > wrap.height - 4) top = Math.max(4, e.clientY - wrap.top - tb.height - 14);
+    tip.style.left = Math.max(4, left) + "px";
+    tip.style.top = top + "px";
+  }
+  const hideTip = () => $("tip").classList.remove("show");
+
+  /* ---------- panel 2 ---------- */
+  function renderPanel2() {
+    const rows = selected();
+    const withMoney = rows.filter(c => pensionUsd(c) != null);
+
+    const linkable = rows.reduce((s, c) => s + compute(c).linkable, 0);
+    const flow = withMoney.reduce((s, c) => s + (compute(c).flow || 0), 0);
+    const stock = withMoney.reduce((s, c) => s + (compute(c).stock || 0), 0);
+    const total = withMoney.reduce((s, c) => s + (compute(c).total || 0), 0);
+
+    $("mDeaths").textContent = fmtInt(linkable);
+    $("uDeaths").textContent = "per year, " + (S.bound === "floor" ? "conservative" : "optimistic");
+    $("mFlow").textContent = fmtUsd(flow);
+    $("mStock").textContent = S.includeStock ? fmtUsd(stock) : "excluded";
+    $("mTotal").textContent = fmtUsd(total);
+    $("uTotal").textContent = S.includeStock ? "flow plus sweep, " + withMoney.length + " countries"
+                                             : "flow only, " + withMoney.length + " countries";
+
+    // The band, recomputed live: only the four assumptions move.
+    const save = { timely: S.timely, match: S.match, delay: S.delay, stop: S.stop, ghost: S.ghost };
+    const band = {};
+    ["cons", "opt"].forEach(k => {
+      Object.assign(S, SCEN[k]);
+      band[k] = withMoney.reduce((s, c) => s + (compute(c).total || 0), 0);
+    });
+    Object.assign(S, save);
+    const ceilDeaths = rows.reduce((s, c) => s + compute(c, "ceil").linkable, 0);
+    const floorDeaths = rows.reduce((s, c) => s + compute(c, "floor").linkable, 0);
+
+    $("spreadNote").innerHTML = "<strong>Read the span, not the midpoint.</strong> Holding the data " +
+      "fixed and moving only the assumptions from cautious to optimistic changes the year-one total from <b>" +
+      fmtUsd(band.cons) + "</b> to <b>" + fmtUsd(band.opt) + "</b>, a factor of <b>" +
+      (band.cons > 0 ? (band.opt / band.cons).toFixed(1) : "—") + "</b>. The overlap bracket, by contrast, " +
+      "moves the count of linkable deaths by a factor of <b>" +
+      (floorDeaths > 0 ? (ceilDeaths / floorDeaths).toFixed(2) : "—") +
+      "</b>. Anyone quoting a point estimate from this page is quoting their own assumptions, not this data." +
+      '<span class="cite">Every figure above is <b>potential payment exposure identifiable through CRVS linkage</b>. ' +
+      "It is not fraud, not a confirmed overpayment and not a realised saving.</span>";
+
+    $("th2ov").textContent = S.bound === "floor" ? "Floor overlap" : "Ceiling overlap";
+
+    const lcu = S.cur === "lcu";
+    const body = rows.map(c => {
+      const m = compute(c);
+      const conv = v => v == null ? null : (lcu && c.fxRate ? v * c.fxRate : v);
+      const money = v => {
+        const z = conv(v);
+        return z == null ? '<span class="dash">—</span>' : (lcu ? Math.round(z).toLocaleString("en-GB") : fmtUsd(z));
+      };
+      const pen = m.pension == null
+        ? '<td class="l"><span class="dash">—</span></td>'
+        : '<td class="l"><input type="number" min="0" step="1" data-iso="' + c.iso3 + '" value="' +
+          Math.round(conv(m.pension)) + '" aria-label="Monthly pension for ' + shortName(c.name) + '"> ' +
+          '<span style="font-size:10px;color:var(--grey)">' + (lcu ? (c.currency || "LCU").slice(0, 3) : "USD") + "</span></td>";
+      const why = m.pension == null
+        ? '<td class="why">' + (c.missingReason || "No pension amount derivable") + "</td>"
+        : '<td class="why">' + (c.regCompletenessOnly ? "Completeness only · " : "Coverage ratio · ") +
+          (c.pensionModelled ? "modelled coverage · " : "") + c.financeYear + " pension</td>";
+      return "<tr>" +
+        '<td class="l name">' + shortName(c.name) + "</td>" +
+        "<td>" + fmtPct(m.overlap) + "</td>" +
+        "<td>" + fmtInt(m.linkable) + "</td>" +
+        pen +
+        "<td>" + money(m.flow) + "</td>" +
+        "<td>" + (S.includeStock ? money(m.stock) : '<span class="dash">—</span>') + "</td>" +
+        '<td class="floorcell">' + money(m.total) + "</td>" +
+        why + "</tr>";
+    }).join("");
+    $("tbl2").querySelector("tbody").innerHTML = body;
+    $("empty2").hidden = rows.length > 0;
+    $("tbl2").parentElement.hidden = rows.length === 0;
+
+    $("tbl2").querySelectorAll("input[data-iso]").forEach(inp => {
+      inp.addEventListener("change", () => {
+        const c = C.find(k => k.iso3 === inp.dataset.iso);
+        const v = parseFloat(inp.value);
+        if (!isFinite(v) || v < 0) delete S.overrides[c.iso3];
+        else S.overrides[c.iso3] = (S.cur === "lcu" && c.fxRate) ? v / c.fxRate : v;
+        render();
+      });
+    });
+
+    $("paramEcho").innerHTML = [
+      "Overlap bound: <b>" + (S.bound === "floor" ? "floor" : "ceiling") + "</b>",
+      "Timely registration: <b>" + S.timely + "%</b>",
+      "Match rate: <b>" + S.match + "%</b>",
+      "Months avoided: <b>" + S.delay + "</b>",
+      "Legally stoppable: <b>" + S.stop + "%</b>",
+      "Already deceased: <b>" + S.ghost + "%</b>",
+      "First-year sweep: <b>" + (S.includeStock ? "included" : "excluded") + "</b>",
+      "Countries in scope: <b>" + rows.length + "</b>, valued: <b>" + withMoney.length + "</b>",
+      "Overrides entered: <b>" + Object.keys(S.overrides).length + "</b>"
+    ].join("<br>");
+  }
+
+  /* ---------- chain ---------- */
+  function renderChain() {
+    const c = C.find(k => k.iso3 === $("chainCountry").value);
+    if (!c) { $("chain").innerHTML = ""; return; }
+    const m = compute(c);
+    const ev = t => '<span class="ev ' + t + '">CLASS ' + t.toUpperCase() + "</span>";
+    const step = (qty, label, sub) =>
+      '<div class="step"><span class="qty num">' + qty + "</span>" + label +
+      (sub ? '<span class="sub">' + sub + "</span>" : "") + "</div>";
+    const op = t => '<div class="op">' + t + "</div>";
+
+    let h = step(fmtInt(c.deaths65), "Deaths aged 65 and over, " + c.deathsYear + ev("b"),
+                 "UN World Population Prospects 2024, medium variant");
+    h += op("×");
+    h += step(fmtPct(m.overlap), "Overlap " + (S.bound === "floor" ? "floor" : "ceiling") + ev("c"),
+              (S.bound === "floor" ? "MAX(0, R + P − 100)" : "MIN(R, P)") + " from " +
+              fmtPct(c.regRate) + " registration and " + fmtPct(c.pensionCov) + " coverage");
+    h += op("=");
+    h += '<div class="out mid"><span class="qty num">' + fmtInt(m.linkable) +
+         "</span>Deaths a linkage would have to review</div>";
+
+    if (m.pension == null) {
+      h += '<div class="step" style="padding-top:12px"><span class="qty num" style="color:var(--grey)">—</span>' +
+           "No defensible monthly pension" + ev("e") +
+           '<span class="sub">' + (c.missingReason || "not derivable from ASPIRE") + "</span></div>";
+      $("chain").innerHTML = h;
+      return;
+    }
+
+    h += '<div class="step" style="padding-top:12px"><span class="qty num">' + fmtInt(m.matchable) +
+         "</span>Timely and matchable" + ev("d") +
+         '<span class="sub">× ' + S.timely + "% registered in time × " + S.match + "% matched</span></div>";
+    h += op("×");
+    h += step(fmtUsd(m.pension), "Monthly pension" + ev(S.overrides[c.iso3] != null ? "d" : "c"),
+              S.overrides[c.iso3] != null ? "Your override"
+                : "ASPIRE expenditure ÷ beneficiaries, " + c.financeYear + ", converted at the " +
+                  c.financeYear + " market rate");
+    h += op("×");
+    h += step(S.delay + " months × " + S.stop + "%", "Payment avoided, legally stoppable" + ev("d"),
+              "The reduction in delay, not the whole delay");
+    h += '<div class="out' + (S.includeStock && m.stock != null ? " mid" : "") + '">' +
+         '<span class="qty num">' + fmtUsd(m.flow) + "</span>Annual flow exposure</div>";
+
+    if (S.includeStock && m.stock != null) {
+      h += '<div class="step" style="padding-top:12px"><span class="qty num">' + fmtInt(m.ghosts) +
+           "</span>Beneficiaries already deceased" + ev("d") +
+           '<span class="sub">' + S.ghost + "% of " + fmtInt(c.beneficiaries) +
+           " on the payroll × 12 months × " + S.stop + "% stoppable</span></div>";
+      h += '<div class="out"><span class="qty num">' + fmtUsd(m.total) +
+           "</span>Total, year one — flow plus one-off sweep</div>";
+    }
+    $("chain").innerHTML = h;
+  }
+
+  /* ---------- csv ---------- */
+  function downloadCsv() {
+    const head = ["country", "iso3", "deaths_65plus", "deaths_year", "registration_rate_pct",
+      "registration_measure", "pension_coverage_pct", "pension_coverage_year", "overlap_floor_pct",
+      "overlap_ceiling_pct", "bound_used", "linkable_deaths", "monthly_pension_usd",
+      "annual_flow_exposure_usd", "first_year_sweep_usd", "total_year_1_usd", "beneficiaries",
+      "data_quality_score", "year_alignment", "missing_reason"];
+    const q = v => v == null ? "" : '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [head.join(",")];
+    selected().forEach(c => {
+      const m = compute(c);
+      lines.push([c.name, c.iso3, c.deaths65, c.deathsYear, c.regRate, c.regMeasure, c.pensionCov,
+        c.pensionCovYear, c.floorPct, c.ceilPct, S.bound, Math.round(m.linkable),
+        m.pension == null ? null : Math.round(m.pension),
+        m.flow == null ? null : Math.round(m.flow),
+        S.includeStock && m.stock != null ? Math.round(m.stock) : null,
+        m.total == null ? null : Math.round(m.total),
+        c.beneficiaries == null ? null : Math.round(c.beneficiaries),
+        c.quality, c.yearAlign, c.missingReason].map(q).join(","));
+    });
+    lines.push("");
+    lines.push(q("Assumptions (CLASS D, no published source): timely " + S.timely + "%, match " +
+      S.match + "%, months avoided " + S.delay + ", legally stoppable " + S.stop +
+      "%, already deceased " + S.ghost + "%"));
+    lines.push(q("Potential payment exposure identifiable through CRVS linkage. Not fraud, not " +
+      "confirmed overpayment, not realised savings."));
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" }));
+    a.download = "crvs_pension_linkage_" + S.scen + "_" + S.bound + ".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  /* ---------- wiring ---------- */
+  function syncLabels() {
+    $("vDeaths").textContent = S.minDeaths ? fmtInt(S.minDeaths) : "none";
+    $("vCov").textContent = S.minCov ? S.minCov + "%" : "none";
+    $("vReg").textContent = S.minReg ? S.minReg + "%" : "none";
+    $("vTimely").textContent = S.timely + "%";
+    $("vMatch").textContent = S.match + "%";
+    $("vDelay").textContent = S.delay;
+    $("vStop").textContent = S.stop + "%";
+    $("vGhost").textContent = S.ghost.toFixed(1) + "%";
+  }
+  function render() { syncLabels(); renderPanel1(); renderPanel2(); renderChain(); }
+
+  function bind(id, key) {
+    $(id).addEventListener("input", e => {
+      S[key] = parseFloat(e.target.value);
+      if (["timely", "match", "delay", "stop", "ghost"].indexOf(key) >= 0) {
+        S.scen = "custom";
+        document.querySelectorAll("[data-scen]").forEach(b => b.setAttribute("aria-pressed", "false"));
+      }
+      render();
+    });
+  }
+  bind("sDeaths", "minDeaths"); bind("sCov", "minCov"); bind("sReg", "minReg");
+  bind("sTimely", "timely"); bind("sMatch", "match"); bind("sDelay", "delay");
+  bind("sStop", "stop"); bind("sGhost", "ghost");
+
+  $("cCompleteness").addEventListener("change", e => { S.exclCompleteness = e.target.checked; render(); });
+  $("cPartial").addEventListener("change", e => { S.exclPartial = e.target.checked; render(); });
+  $("cStock").addEventListener("change", e => { S.includeStock = e.target.checked; render(); });
+
+  document.querySelectorAll("[data-scen]").forEach(b => {
+    b.addEventListener("click", () => {
+      S.scen = b.dataset.scen;
+      Object.assign(S, SCEN[S.scen]);
+      $("sTimely").value = S.timely; $("sMatch").value = S.match;
+      $("sDelay").value = S.delay; $("sStop").value = S.stop; $("sGhost").value = S.ghost;
+      document.querySelectorAll("[data-scen]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      render();
+    });
+  });
+
+  function pair(aId, bId, onA, onB) {
+    $(aId).addEventListener("click", () => {
+      $(aId).setAttribute("aria-pressed", "true"); $(bId).setAttribute("aria-pressed", "false"); onA(); render();
+    });
+    $(bId).addEventListener("click", () => {
+      $(bId).setAttribute("aria-pressed", "true"); $(aId).setAttribute("aria-pressed", "false"); onB(); render();
+    });
+  }
+  pair("bFloor", "bCeil",
+    () => { S.bound = "floor"; $("scenHint").textContent = "Conservative floor: the smallest overlap arithmetically possible between registered deaths and pension receipt. This is the figure the model recommends quoting."; },
+    () => { S.bound = "ceil"; $("scenHint").textContent = "Optimistic ceiling: the largest overlap arithmetically possible, reached only if every pensioner's death is registered. Use it as a bound, never as the expected case."; });
+  pair("bUsd", "bLcu", () => { S.cur = "usd"; }, () => { S.cur = "lcu"; });
+
+  $("dl").addEventListener("click", downloadCsv);
+  $("clearO").addEventListener("click", () => { S.overrides = {}; render(); });
+  $("chainCountry").addEventListener("change", renderChain);
+
+  const tabs = [["t1", "p1"], ["t2", "p2"], ["t3", "p3"]];
+  tabs.forEach(([t, p]) => {
+    $(t).addEventListener("click", () => {
+      tabs.forEach(([tt, pp]) => {
+        const on = tt === t;
+        $(tt).setAttribute("aria-selected", String(on));
+        $(pp).hidden = !on;
+      });
+      if (t === "t1") renderPlot(selected());
+    });
+  });
+  window.addEventListener("resize", () => renderPlot(selected()));
+
+  /* ---------- init ---------- */
+  const opts = C.filter(c => c.pensionUsd != null)
+    .sort((a, b) => (b.pensionUsd * b.floorDeaths) - (a.pensionUsd * a.floorDeaths));
+  $("chainCountry").innerHTML = opts.map(c =>
+    '<option value="' + c.iso3 + '">' + shortName(c.name) + "</option>").join("");
+
+  render();
+})();
+
+</script>
+<script>
+(function () {
+  "use strict";
+  var COPY = {"im": {"h1": "What could linking birth registries to immunization programmes deliver?", "p": "Where registration is high but immunization lags, the state already knows these children exist. The registry can be used as a find-list for the ones missing vaccines. This model sizes that opportunity conservatively and prices it against published evidence."}, "dr": {"h1": "What could linking death registries to pension payrolls deliver?", "p": "Pension systems pay monthly. Death registers record deaths. In most countries the two files never meet, so payment continues for as long as it takes the news to travel by some other route. This model sizes that gap country by country, brackets what cannot be known, and refuses to give you a single number for it."}};
+  var title = document.getElementById("mh-title");
+  var intro = document.getElementById("mh-intro");
+  function sync(tab) {
+    var key = tab.getAttribute("data-model") || "im";
+    title.textContent = COPY[key].h1;
+    intro.textContent = COPY[key].p;
+  }
+  document.querySelectorAll(".tab").forEach(function (t) {
+    t.addEventListener("click", function () { sync(t); });
+  });
+  var open = document.querySelector('.tab[aria-selected="true"]');
+  if (open) sync(open);
+})();
 </script>
 </body>
 </html>
